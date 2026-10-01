@@ -7,6 +7,21 @@ const path = require("path");
 
 const ROOT = __dirname;
 const PORT = Number(process.env.PORT) || 3000;
+const LIVE_RELOAD = process.env.LIVE_RELOAD === "1";
+
+const RELOAD_SNIPPET = `<script>new EventSource("/__livereload").onmessage=()=>location.reload();</script>`;
+const clients = new Set();
+
+function watchForChanges() {
+	let timer;
+	fs.watch(ROOT, { recursive: true }, (_event, filename) => {
+		if (!filename || filename.includes("node_modules") || filename.startsWith(".git")) return;
+		clearTimeout(timer);
+		timer = setTimeout(() => {
+			for (const client of clients) client.write("data: reload\n\n");
+		}, 50);
+	});
+}
 
 const MIME_TYPES = {
 	".html": "text/html; charset=utf-8",
@@ -36,6 +51,18 @@ function resolveSafePath(urlPath) {
 }
 
 const server = http.createServer((req, res) => {
+	if (LIVE_RELOAD && req.url === "/__livereload") {
+		res.writeHead(200, {
+			"Content-Type": "text/event-stream",
+			"Cache-Control": "no-cache",
+			Connection: "keep-alive",
+		});
+		res.write("\n");
+		clients.add(res);
+		req.on("close", () => clients.delete(res));
+		return;
+	}
+
 	let filePath = resolveSafePath(req.url);
 	if (!filePath) {
 		res.writeHead(400);
@@ -57,6 +84,10 @@ const server = http.createServer((req, res) => {
 
 			const ext = path.extname(filePath).toLowerCase();
 			res.writeHead(200, { "Content-Type": MIME_TYPES[ext] || "application/octet-stream" });
+			if (LIVE_RELOAD && ext === ".html") {
+				res.end(content + RELOAD_SNIPPET);
+				return;
+			}
 			res.end(content);
 		});
 	});
@@ -64,4 +95,8 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
 	console.log(`Serving ${ROOT} at http://localhost:${PORT}`);
+	if (LIVE_RELOAD) {
+		watchForChanges();
+		console.log("Live reload enabled");
+	}
 });

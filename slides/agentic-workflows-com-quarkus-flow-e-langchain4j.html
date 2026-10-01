@@ -1248,6 +1248,156 @@ public interface ExpertsAgent {
 				</aside>
 			</section>
 
+			<!-- Slides 16-20 from quarkus-flow-orquestrando-complexidade-e-agentes-de-ia -->
+			<!-- Slide: Quarkus Flow features -->
+			<!-- Slide 13 from quarkus-flow-orquestrando-complexidade-e-agentes-de-ia -->
+			<section data-background-gradient="linear-gradient(to bottom, #ffffff, #dbe9f8)">
+				<img src="images/quarkus-logo.png">
+				<h1>Quarkus Flow</h1>
+				<aside class="notes">
+					Apresentando o Quarkus Flow - a solução para orquestração explícita de workflows.
+				</aside>
+			</section>
+
+
+			<section>
+				<h2>Quarkus Flow</h2>
+				<p class="fragment" style="font-size: 0.85em">Quarkus Flow é Workflow Engine para Quarkus:</p>
+				<ul style="font-size: 0.8em">
+					<li class="fragment">
+						Gerenciamento de estado, controle de fluxo, chamadas remotas, mensageria, resiliência,
+						observabilidade, etc.
+					</li>
+					<li class="fragment">
+						Permite Human-in-the-Loop (HITL) e Agentic patterns
+					</li>
+					<li class="fragment">
+						Permite a criação de workflows duráveis (Durable Workflows)
+					</li>
+					<li class="fragment">
+						Deixa sua lógica de negócio limpa e orquestra a complexidade para você
+					</li>
+				</ul>
+				<aside class="notes">
+					Quarkus Flow oferece gerenciamento completo de workflows com estado, resiliência, observabilidade e
+					suporte a padrões modernos como HITL e agentes.
+				</aside>
+			</section>
+
+			<!-- Slide: Open Workflow Specification -->
+			<section>
+				<h2>Open Workflow Specification</h2>
+				<ul style="font-size: 0.85em">
+					<li class="fragment">Projeto CNCF Sandbox (candidatando-se à incubação este ano)</li>
+					<li class="fragment">Ecossistema neutro em relação a fornecedores (vendor-neutral)</li>
+					<li class="fragment">Integração fluida com arquiteturas modernas</li>
+					<li class="fragment">
+						Padrões suportados: CloudEvents, AsyncAPI, gRPC, OpenAPI, A2A, MCP e outros
+					</li>
+				</ul>
+				<aside class="notes">
+					Baseado na especificação Serverless Workflow da CNCF, que é vendor-neutral e suporta diversos
+					padrões modernos.
+				</aside>
+			</section>
+
+			<!-- Slide: Code Example - Java DSL -->
+			<section>
+				<h2 data-id="code-title">Java DSL</h2>
+
+				<pre><code class="java" data-trim data-line-numbers="|1-2|3-11">
+@ApplicationScoped
+public class EmitFlow extends Flow {
+  @Override
+  public Workflow descriptor() {
+    return workflow("emit", "test")
+      .tasks(
+        emit("com.petstore.order.placed.v1")
+          .source("https://petstore.com")
+          .jsonData(Order.class))
+      .build();
+  }
+}
+					</code></pre>
+				<aside class="notes">
+					Exemplo de definição de workflow usando Java DSL. Esta é uma forma programática de definir workflows
+					seguindo a especificação Serverless Workflow.
+				</aside>
+			</section>
+
+			<!-- Slide: Code Example - YAML Definition -->
+			<section>
+				<h2>YAML Definition</h2>
+				<pre>
+						<code class="yaml" data-trim data-line-numbers="|1-5|6|7|8-19">
+document:
+  dsl: '1.0.3'
+  namespace: test
+  name: emit
+  version: '0.1.0'
+  do:
+    - emitEvent:
+        emit:
+          event:
+            with:
+              source: https://petstore.com
+              type: com.petstore.order.placed.v1
+              data:
+                client:
+                  firstName: Cruella
+                  lastName: de Vil
+                items:
+                  - breed: dalmatian
+                    quantity: 101
+					</code>
+				</pre>
+			</section>
+
+			<!-- Slide: Architecture -->
+			<section>
+				<h2>Arquitetura e Ecossistema</h2>
+				<div class="architecture-diagram" style="font-size: 0.7em">
+
+					<div id="benefits"
+						style="text-align: left; max-width: 800px; margin-left: auto; margin-right: auto;">
+						<p><strong>Integração nativa com a infraestrutura Quarkus</strong></p>
+						<p><strong>Arquitetura plugável</strong></p>
+					</div>
+					<div
+						style="margin-top: 1rem; text-align: left; max-width: 800px; margin-left: auto; margin-right: auto">
+						<div
+							style="text-align: center; background: rgba(13, 28, 44, 0.10); padding: 0.5rem; margin: 0.3rem; border-radius: 5px">
+							<strong>Quarkus Flow</strong>
+						</div>
+						<div
+							style="text-align: center; background: rgba(13, 28, 44, 0.07); padding: 0.5rem; margin: 0.3rem; border-radius: 5px">
+							<strong>Java SDK / DSL</strong> (Engine)
+						</div>
+						<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin: 0.3rem">
+							<div style="background: rgba(13, 28, 44, 0.07); padding: 0.5rem; border-radius: 5px">
+								<strong>Persistence</strong><br />Redis/JPA
+							</div>
+							<div style="background: rgba(13, 28, 44, 0.07); padding: 0.5rem; border-radius: 5px">
+								<strong>Messaging</strong><br />Any
+							</div>
+							<div style="background: rgba(13, 28, 44, 0.07); padding: 0.5rem; border-radius: 5px">
+								<strong>Smallrye Fault Tolerance</strong><br />
+							</div>
+						</div>
+						<div
+							style="background: rgba(13, 28, 44, 0.14); padding: 0.5rem; margin: 0.3rem; border-radius: 5px">
+							<strong>Quarkus Infrastructure</strong> (Arc, HTTP, etc.)
+						</div>
+					</div>
+				</div>
+				<aside class="notes">
+					Arquitetura plugável que se integra nativamente com Quarkus. Você escolhe apenas os componentes que
+					precisa: persistência, mensageria, tolerância a falhas, etc.
+				</aside>
+			</section>
+
+
+
 			<!-- Slide: Quarkus Flow superpowers for LangChain4j -->
 			<section>
 				<h2><span class="quarkus-gradient">Quarkus Flow</span> + LangChain4J</h2>
@@ -1408,7 +1558,7 @@ public class NewsletterFlow extends Flow {
 			<section>
 				<h2>Matheus Cruz</h2>
 				<div style="display: grid; grid-template-columns: 240px 1fr 200px; align-items: center; gap: 2rem; width: 95%; margin: 1.5rem auto 0">
-					<img src="images/mcruzdev.jpeg" alt="Matheus Cruz"
+					<img src="images/mathecruz.jpeg" alt="Matheus Cruz"
 						style="width: 240px; height: 240px; margin: 0; border-radius: 50%; object-fit: cover; object-position: 35% center; border: 0; box-shadow: 0 6px 24px rgba(13, 28, 44, 0.3)" />
 					<ul style="font-size: 0.52em; margin: 0; list-style: none; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 0.9rem">
 						<li>Sr. Software Engineer na IBM</li>
@@ -1418,7 +1568,7 @@ public class NewsletterFlow extends Flow {
 						<li>Dapr Meteor</li>
 					</ul>
 					<div>
-						<a href="https://www.linkedin.com/in/mcruzdev1/" target="_blank" rel="noopener">
+						<a href="https://www.linkedin.com/in/mathecruz1/" target="_blank" rel="noopener">
 							<img src="images/linkedin-qrcode.svg" alt="QR code do LinkedIn"
 								style="width: 200px; height: 200px; margin: 0; border: 0; box-shadow: none" />
 						</a>

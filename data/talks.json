@@ -11,7 +11,7 @@
 		"date": "2026-09-05",
 		"location": "Nubank, São Paulo — Comunidade DevConverge LATAM",
 		"slides": "slides/todo-sistema-tem-um-workflow-escodido.html",
-		"demo": "https://github.com/mcruzdev/agentic-ai-durable"
+		"demo": "https://github.com/mathecruz/agentic-ai-durable"
 	},
 	{
 		"title": "Quarkus Flow: Orquestrando Complexidade e Agentes de IA",
@@ -19,8 +19,8 @@
 		"location": "FIAP, Rio de Janeiro — SouJava RJ",
 		"slides": "slides/quarkus-flow-orquestrando-complexidade-e-agentes-de-ia.html",
 		"demo": [
-			"https://github.com/mcruzdev/agentic-ai-durable",
-			"https://github.com/mcruzdev/github-stars-raffle"
+			"https://github.com/mathecruz/agentic-ai-durable",
+			"https://github.com/mathecruz/github-stars-raffle"
 		]
 	},
 	{
@@ -30,8 +30,8 @@
 		"slides": "https://docs.google.com/presentation/d/1MVw1qHz2BaTjZT2U_CRYcb9hGemtQRKgMiGq-v8Rsqg/edit?usp=sharing",
 		"video": "https://youtu.be/DbvKb3dE2_E?t=5302",
 		"demo": [
-			"https://github.com/mcruzdev/agentic-ai-durable",
-			"https://github.com/mcruzdev/github-stars-raffle"
+			"https://github.com/mathecruz/agentic-ai-durable",
+			"https://github.com/mathecruz/github-stars-raffle"
 		]
 	},
 	{
@@ -40,6 +40,6 @@
 		"location": "YouTube",
 		"video": "https://www.youtube.com/watch?v=oGZuz5vPtww",
 		"slides": "https://docs.google.com/presentation/d/1knsya04GK1v5-e3DsGWvhA_BVgnGPVzp/edit?usp=sharing&ouid=100051499153284596370&rtpof=true&sd=true",
-		"demo": "https://github.com/mcruzdev/frictionless-java-jugbrazil"
+		"demo": "https://github.com/mathecruz/frictionless-java-jugbrazil"
 	}
 ]
