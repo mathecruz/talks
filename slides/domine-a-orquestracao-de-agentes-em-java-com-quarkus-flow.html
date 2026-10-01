@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+	<meta charset="utf-8" />
+
+	<title>Agentic Workflows com Quarkus Flow e LangChain4j</title>
+
+	<meta name="description" content="Apresentação sobre Agentic Workflows com Quarkus Flow" />
+	<meta name="author" content="Matheus Cruz" />
+
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="mobile-web-app-status-bar-style" content="black-translucent" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<link rel="stylesheet" href="dist/reset.css" />
+	<link rel="stylesheet" href="dist/reveal.css" />
+	<link rel="stylesheet" href="dist/theme/white.css" id="theme" />
+
+	<style>
+		/* Light syntax highlighting (GitHub style) to match the white theme.
+		   reveal.js only ships dark highlight themes (monokai/zenburn). */
+		.hljs {
+			color: #24292e;
+			background: #f6f8fa;
+		}
+
+		.hljs-doctag,
+		.hljs-keyword,
+		.hljs-meta .hljs-keyword,
+		.hljs-template-tag,
+		.hljs-template-variable,
+		.hljs-type,
+		.hljs-variable.language_ {
+			color: #d73a49;
+		}
+
+		.hljs-title,
+		.hljs-title.class_,
+		.hljs-title.class_.inherited__,
+		.hljs-title.function_ {
+			color: #6f42c1;
+		}
+
+		.hljs-attr,
+		.hljs-attribute,
+		.hljs-literal,
+		.hljs-meta,
+		.hljs-number,
+		.hljs-operator,
+		.hljs-selector-attr,
+		.hljs-selector-class,
+		.hljs-selector-id,
+		.hljs-variable {
+			color: #005cc5;
+		}
+
+		.hljs-meta .hljs-string,
+		.hljs-regexp,
+		.hljs-string {
+			color: #032f62;
+		}
+
+		.hljs-built_in,
+		.hljs-symbol {
+			color: #e36209;
+		}
+
+		.hljs-code,
+		.hljs-comment,
+		.hljs-formula {
+			color: #6a737d;
+		}
+
+		.hljs-name,
+		.hljs-quote,
+		.hljs-selector-pseudo,
+		.hljs-selector-tag {
+			color: #22863a;
+		}
+
+		.hljs-subst {
+			color: #24292e;
+		}
+
+		.hljs-section {
+			color: #005cc5;
+			font-weight: bold;
+		}
+
+		.hljs-bullet {
+			color: #735c0f;
+		}
+
+		.hljs-emphasis {
+			color: #24292e;
+			font-style: italic;
+		}
+
+		.hljs-strong {
+			color: #24292e;
+			font-weight: bold;
+		}
+
+		.hljs-addition {
+			color: #22863a;
+			background-color: #f0fff4;
+		}
+
+		.hljs-deletion {
+			color: #b31d28;
+			background-color: #ffeef0;
+		}
+
+		/* Light code block container */
+		.reveal pre {
+			box-shadow: 0 2px 12px rgba(13, 28, 44, 0.12);
+			border-radius: 8px;
+		}
+
+		/* Auto-animate leaves will-change/transform layers on matched elements,
+		   which makes the text rasterize blurry once the transition ends. */
+		.reveal section[data-auto-animate]:not([data-auto-animate="running"]) [data-auto-animate-target] {
+			will-change: auto !important;
+			transform: none !important;
+		}
+
+		.reveal pre code {
+			background: #f6f8fa;
+			border: 1px solid rgba(13, 28, 44, 0.12);
+			border-radius: 8px;
+		}
+	</style>
+
+	<style>
+		.provider-logos {
+			display: flex;
+			width: 90%;
+			gap: 1rem;
+			margin: 0.5rem auto 1rem;
+			font-size: 0.8em;
+		}
+
+		.provider {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 0.6rem;
+			flex: 1;
+			box-sizing: border-box;
+			height: 2.6em;
+			padding: 0.7em 2em;
+			background: linear-gradient(to bottom, var(--quarkus-blue), var(--quarkus-red)) left / 2px 100% no-repeat, rgba(0, 0, 0, 0.04);
+			border-radius: 8px;
+		}
+
+		.provider-logo {
+			max-height: 100%;
+			max-width: 100%;
+			height: 1.2em;
+			width: auto;
+			margin: 0;
+			border: 0;
+			box-shadow: none;
+			background: none;
+		}
+
+		.framework-item {
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+			margin: 0.4em 0;
+		}
+
+		.framework-name {
+			min-width: 7.5em;
+		}
+
+		.framework-logos {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.8rem;
+		}
+
+		.framework-logos img {
+			height: 1.6em;
+			width: auto;
+			margin: 0;
+			border: 0;
+			box-shadow: none;
+			background: none;
+		}
+	</style>
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;700;900&family=Red+Hat+Text:wght@400;500;700&display=swap');
+
+		:root {
+			--quarkus-blue: #4695eb;
+			--quarkus-red: #ff004a;
+			--quarkus-dark: #0d1c2c;
+		}
+
+		.reveal {
+			font-family: 'Red Hat Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		}
+
+		.reveal h1,
+		.reveal h2,
+		.reveal h3,
+		.reveal h4,
+		.reveal h5,
+		.reveal h6 {
+			font-family: 'Red Hat Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+			font-weight: 700;
+			text-transform: none;
+			letter-spacing: -0.02em;
+		}
+
+		.reveal h1,
+		.reveal h2,
+		.reveal h3 {
+			color: var(--quarkus-dark);
+		}
+
+		.reveal h1 {
+			font-weight: 900;
+			font-size: 2.5em;
+		}
+
+		.reveal h2 {
+			font-weight: 700;
+			font-size: 1.8em;
+		}
+
+		/* Quarkus blue→red accent bar under slide titles */
+		.reveal h2::after {
+			content: '';
+			display: block;
+			width: 90px;
+			height: 6px;
+			margin: 0.35em auto 0;
+			border-radius: 3px;
+			background: linear-gradient(90deg, var(--quarkus-blue), var(--quarkus-red));
+		}
+
+		.quarkus-gradient {
+			background: linear-gradient(90deg, var(--quarkus-blue), var(--quarkus-red));
+			-webkit-background-clip: text;
+			background-clip: text;
+			-webkit-text-fill-color: transparent;
+			color: transparent;
+		}
+
+		.quarkus-blue {
+			color: var(--quarkus-blue);
+		}
+
+		.quarkus-red {
+			color: var(--quarkus-red);
+		}
+
+		.reveal strong {
+			font-weight: 700;
+			color: var(--quarkus-blue);
+		}
+
+		.reveal code {
+			font-family: 'Red Hat Mono', 'Courier New', monospace;
+		}
+
+		/* Quoted definition: italic text, blue→red gradient on the quotation marks */
+		.reveal blockquote.quote {
+			width: auto;
+			margin: 1rem 0;
+			padding: 0;
+			font-size: 0.85em;
+			font-style: italic;
+			text-align: left;
+			background: none;
+			box-shadow: none;
+		}
+
+		.reveal blockquote.quote::before,
+		.reveal blockquote.quote::after {
+			display: inline-block;
+			font-family: Georgia, 'Times New Roman', serif;
+			font-style: normal;
+			font-weight: 700;
+			font-size: 1.6em;
+			line-height: 1;
+			vertical-align: -0.2em;
+			background: linear-gradient(90deg, var(--quarkus-blue), var(--quarkus-red));
+			-webkit-background-clip: text;
+			background-clip: text;
+			-webkit-text-fill-color: transparent;
+			color: transparent;
+		}
+
+		.reveal blockquote.quote::before {
+			content: '\201C';
+			margin-right: 0.05em;
+		}
+
+		.reveal blockquote.quote::after {
+			content: '\201D';
+			margin-left: 0.05em;
+		}
+
+		.two-columns {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 2rem;
+			align-items: start;
+		}
+
+		.two-columns>div {
+			height: 100%;
+		}
+
+		.flow-diagram {
+			background: rgba(0, 0, 0, 0.05);
+			padding: 1.5rem;
+			border-radius: 8px;
+			margin: 1rem 0;
+		}
+
+		.agent-type {
+			font-family: 'Red Hat Mono', monospace;
+			color: var(--quarkus-blue);
+		}
+
+		/* Keep the slide number clear of the logo badge */
+		.reveal .slide-number {
+			right: 76px;
+			bottom: 16px;
+		}
+
+		/* GitHub handles shown on every slide, bottom-left corner */
+		.github-badge {
+			position: absolute;
+			bottom: 16px;
+			left: 16px;
+			height: 48px;
+			display: flex;
+			align-items: center;
+			gap: 0.45em;
+			z-index: 30;
+			font-family: 'Red Hat Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+			font-size: 17px;
+			font-weight: 500;
+			color: var(--quarkus-dark);
+		}
+
+		.github-badge svg {
+			width: 22px;
+			height: 22px;
+			fill: var(--quarkus-dark);
+		}
+
+		.github-badge .sep {
+			color: rgba(13, 28, 44, 0.4);
+		}
+
+		/* Quarkus logo badge shown on every slide */
+		.reveal .quarkus-logo-badge {
+			position: absolute;
+			bottom: 16px;
+			right: 16px;
+			margin: 0;
+			/* reveal.css gives .reveal img a 20px vertical margin */
+			width: 48px;
+			height: 48px;
+			border-radius: 8px;
+			z-index: 30;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<!-- Slide 1: Title -->
+			<section data-background-gradient="linear-gradient(to bottom, #ffffff, #dbe9f8)">
+				<h1>Domine orquestração de Agentes em Java com <span class="quarkus-blue">Quarkus Flow</span></h1>
+				<p style="margin-top: 3rem">
+					Matheus Cruz<br />
+				</p>
+				<aside class="notes">
+					Vamos cumprimentar a audiência, nos apresentar brevenmente e fazer uma pergunta para conhecer um
+					pouco mais sobre a audiência.
+					Fazer perguntas como, quem aí já implementou um código que se comunica com OpenAI, ou alguma outra
+					LLM?
+				</aside>
+			</section>
+
+			<!-- Slide 2: AI-Infused Applications -->
+			<section>
+				<h2>Aplicações com IA Integrada
+					<span
+						style="display: block; font-size: 0.5em; font-weight: 400; font-style: italic; opacity: 0.7; margin-top: 0.3em">(AI
+						Infused applications)</span>
+				</h2>
+
+				<p style="font-size: 0.9em; margin-top: 2rem">O que isso significa?</p>
+				<!--				TODO: Mudar essa porcaria, pegar o conceito daqui: https://learn.deeplearning.ai/courses/agentic-ai/lesson/nae3i1/what-is-agentic-ai%3F-->
+				<!--				TD-->
+				<blockquote class="quote fragment">
+					Programas de software que possuem recursos de inteligência artificial ou aprendizado de máquina
+					integrados diretamente à sua lógica central e operações diárias.
+				</blockquote>
+				<aside class="notes">
+					Começando pelos termos: aplicações AI-Infused são aplicações onde a IA faz parte da solução que
+					resolve problemas do negócio, não algo separado.
+				</aside>
+			</section>
+
+			<!-- Slide 3: Talking to LLMs / Java frameworks -->
+			<section>
+				<h2>Você não precisa reiventar a roda</h2>
+				<p style="font-size: 0.9em">
+					No ecossistema Java, temos diversas bibliotecas que fazem isso pra gente
+				</p>
+				<ul style="font-size: 0.9em">
+					<li class="fragment framework-item">
+						<span class="framework-name"><strong>LangChain4J</strong></span>
+						<span class="framework-logos">
+							<img src="images/quarkus-logo.png" alt="Quarkus" />
+							<img src="images/spring-logo.svg" alt="Spring" />
+							<img src="images/micronaut-logo.svg" alt="Micronaut" />
+						</span>
+					</li>
+					<li class="fragment framework-item">
+						<span class="framework-name">Embabel</span>
+						<span class="framework-logos"><img src="images/spring-logo.svg" alt="Spring" /></span>
+					</li>
+					<li class="fragment framework-item">
+						<span class="framework-name">Spring AI</span>
+						<span class="framework-logos"><img src="images/spring-logo.svg" alt="Spring" /></span>
+					</li>
+				</ul>
+				<p class="fragment" style="font-size: 0.9em; margin-top: 2rem">
+					Aqui, vamos focar no <strong>LangChain4J com Quarkus</strong>.
+				</p>
+				<aside class="notes">
+					Como desenvolvedores, o jeito mais comum de usar IA é nos comunicando com LLMs. No Java temos
+					LangChain4j, Spring AI e Embabel. Nosso foco será LangChain4j com Quarkus.
+				</aside>
+			</section>
+
+			<section>
+				<h2>Quarkus LangChain4J</h2>
+				<p style="font-size: 0.85em">Você só precisa adicionar a dependência do provedor:</p>
+				<div class="provider-logos">
+					<span class="provider"><img class="provider-logo" src="images/openai-logo.svg"
+							alt="OpenAI" />OpenAI</span>
+					<span class="provider"><img class="provider-logo" src="images/ollama-logo.svg"
+							alt="Ollama" />Ollama</span>
+					<span class="provider"><img class="provider-logo" src="images/watsonx-logo.svg"
+							alt="IBM watsonx" /></span>
+				</div>
+				<pre><code class="xml" data-trim data-line-numbers>
+&lt;dependency&gt;
+    &lt;groupId&gt;io.quarkiverse.langchain4j&lt;/groupId&gt;
+    &lt;artifactId&gt;quarkus-langchain4j-openai&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;io.quarkiverse.langchain4j&lt;/groupId&gt;
+    &lt;artifactId&gt;quarkus-langchain4j-ollama&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;io.quarkiverse.langchain4j&lt;/groupId&gt;
+    &lt;artifactId&gt;quarkus-langchain4j-watsonx&lt;/artifactId&gt;
+&lt;/dependency&gt;
+				</code></pre>
+				<aside class="notes">
+					Com Quarkus LangChain4j, basta adicionar a dependência do provedor que você quer usar: OpenAI,
+					Ollama, watsonx, etc.
+				</aside>
+			</section>
+
+			<!-- Slide: Simplest way to talk to OpenAI with LangChain4J -->
+			<section>
+				<h2>A forma mais simples de falar com uma LLM</h2>
+				<!-- <p style="font-size: 0.8em">
+					Essa forma com <strong>ChatModel</strong> funciona muito bem, mas existe uma forma
+					<strong>melhor</strong> e <strong>menos verbosa</strong> de escrever.
+				</p> -->
+				<pre><code class="java" data-trim data-line-numbers>
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.openai.OpenAiChatModel;
+
+ChatModel model = OpenAiChatModel.builder()
+        .apiKey(System.getenv("OPENAI_API_KEY"))
+        .modelName("gpt-4o-mini")
+        .build();
+
+String response = model.chat("What are the common symptoms of the flu?");
+
+System.out.println(response);
+				</code></pre>
+				<aside class="notes">
+					A forma mais simples de se comunicar com a OpenAI usando LangChain4J: criamos um ChatModel com a API
+					key e o nome do modelo, e chamamos chat() com a nossa pergunta. Funciona muito bem, mas existe uma
+					forma
+					melhor e menos verbosa de escrever.
+				</aside>
+			</section>
+
+			<!-- Slide 5: Quarkus LangChain4j dependencies -->
+
+
+			<!-- Slide 6a: AI Service interface -->
+			<section data-auto-animate>
+				<h2 data-id="ai-service-title">E uma interface na sua aplicação</h2>
+				<pre data-id="ai-service-code"><code class="java" data-trim data-line-numbers>
+@RegisterAiService
+public interface DoctorAiService {
+    String ask(String message);
+}
+
+// Em um outro bean da sua aplicação:
+
+@Inject DoctorAiService ai;
+
+String answer = ai.ask("What are the common symptoms of the flu?");
+
+
+
+				</code></pre>
+				<aside class="notes">
+					Basta adicionar uma interface anotada com @RegisterAiService e o Quarkus gera a implementação que
+					conversa com a LLM.
+				</aside>
+			</section>
+
+			<section>
+				<h2>Mas só um <span class="quarkus-gradient">AI Service</span> não é o bastante</h2>
+			</section>
+
+			<!-- Slide 6b: AI Service with prompts -->
+			<section data-auto-animate>
+				<h2 data-id="ai-service-title">Você vai precisar de prompts</h2>
+				<p style="font-size: 0.8em">
+					Prompts guiam a LLM a ser o mais precisa possível, evitando ambiguidade
+					(engenharia de prompt).
+				</p>
+				<pre data-id="ai-service-code"><code class="java" data-trim data-line-numbers="|4|5">
+@RegisterAiService
+public interface DoctorAiService {
+
+    @SystemMessage("You are a medical expert...")
+    @UserMessage("{message}")
+    String ask(String message);
+
+}
+				</code></pre>
+				<aside class="notes">
+					Só que a interface sozinha não basta: você precisa de prompts bem construídos, guiando a LLM da
+					forma mais precisa e menos ambígua possível. @SystemMessage define o papel, @UserMessage a entrada.
+				</aside>
+			</section>
+
+			<!-- Slide 6c: LLMs are stateless - conversation memory -->
+			<section data-auto-animate>
+				<h2 data-id="ai-service-title">LLMs são stateless</h2>
+				<p style="font-size: 0.8em">
+					Cada requisição é uma <strong>nova requisição</strong>: você precisa manter o
+					<strong>estado da conversação</strong> com a LLM.
+				</p>
+				<pre data-id="ai-service-code"><code class="java" data-trim data-line-numbers="|6">
+@RegisterAiService
+public interface DoctorAiService {
+
+    @SystemMessage("You are a medical expert...")
+    @UserMessage("{message}")
+    String ask(@MemoryId String sessionId, String message);
+
+}
+				</code></pre>
+				<aside class="notes">
+					LLMs são stateless: cada requisição é independente. Para manter o contexto da conversa, usamos
+					@MemoryId, que identifica a sessão e permite ao LangChain4j manter a memória da conversação.
+				</aside>
+			</section>
+
+			<!-- Slide 6d: Tools - deterministic operations with your code -->
+			<section data-auto-animate>
+				<h2 data-id="ai-service-title">Tools</h2>
+				<p style="font-size: 0.8em">
+					LLMs <strong>não são determinísticas</strong> e não sabem executar tarefas específicas do seu
+					negócio. Com tools, a LLM executa operações de forma <strong>determinística</strong>, usando o
+					<strong>seu código</strong>.
+				</p>
+				<pre data-id="ai-service-code"><code class="java" data-trim data-line-numbers="|3-4|6-8">
+public class AgendaTools {
+
+    @Inject
+    AgendaRepository repo;
+
+	  @Tool("get available agenda")
+    public Agenda getAgenda() {
+        return repo.availableAgenda();
+    }
+
+}
+				</code></pre>
+				<aside class="notes">
+					LLMs não são determinísticas e também não sabem como executar tarefas específicas do seu negócio e
+					aplicação. Declarando tools, a LLM pode executar uma operação de forma determinística, utilizando
+					o seu código.
+				</aside>
+			</section>
+
+			<!-- Slide 6e: Registering tools in the AI Service -->
+			<section data-auto-animate>
+				<h2 data-id="ai-service-title">Tools</h2>
+				<p style="font-size: 0.8em">
+					Basta registrar a classe de tools no seu <strong>AI Service</strong>:
+				</p>
+				<pre data-id="ai-service-code"><code class="java" data-trim data-line-numbers="|1">
+@RegisterAiService(tools = {AgendaTools.class})
+public interface DoctorAiService {
+
+    @SystemMessage("You are a medical expert...")
+    @UserMessage("{message}")
+    String ask(@MemoryId String sessionId, String message);
+
+}
+				</code></pre>
+				<aside class="notes">
+					Para disponibilizar as tools para a LLM, basta registrá-las no AI Service através do atributo
+					tools do @RegisterAiService.
+				</aside>
+			</section>
+
+			<!-- Slide 6f: RAG -->
+			<section>
+				<h2>RAG</h2>
+				<p style="font-size: 0.75em">
+					<em>Retrieval-Augmented Generation</em>: documentos e informações da
+					que dão <strong>contexto</strong> à LLM.
+				</p>
+
+				<aside class="notes">
+					RAG: a LLM não conhece os dados da sua empresa. Com RAG, você ingere documentos e informações do
+					negócio (políticas, manuais, FAQs) em uma base de conhecimento, tipicamente um vector store com
+					busca semântica. A cada pergunta, os trechos relevantes são recuperados e enviados junto, dando
+					contexto à LLM. A resposta vem fundamentada nos seus dados, reduzindo alucinação.
+				</aside>
+			</section>
+
+			<!-- Slide 6g: Guardrails -->
+			<section>
+				<h2>Guardrails</h2>
+				<p style="font-size: 0.75em">
+					Validam a <strong>entrada</strong> (prompt injection) e a <strong>saída</strong>
+					(alucinação, conteúdo inadequado) do seu AI Service.
+				</p>
+				<pre><code class="java" data-trim data-line-numbers="|4|5">
+@RegisterAiService(tools = {AgendaTools.class})
+public interface DoctorAiService {
+
+    @InputGuardrails(PromptInjectionGuard.class)
+    @OutputGuardrails(MedicalAnswerGuard.class)
+    String ask(@MemoryId String sessionId, String message);
+
+}
+				</code></pre>
+
+				<aside class="notes">
+					Guardrails são mecanismos de segurança: input guardrails validam a entrada do usuário antes de
+					chegar à LLM (ex.: prompt injection); output guardrails validam a resposta antes de chegar ao
+					usuário (ex.: alucinação, conteúdo inadequado). São beans CDI, declarados com @InputGuardrails e
+					@OutputGuardrails. O resultado pode ser success, fatal, retry (regenera a resposta, máximo de
+					tentativas configurável) ou reprompt (ajusta o prompt e tenta de novo).
+				</aside>
+			</section>
+
+			<!-- Slide 6j: The base is not enough -->
+			<section>
+				<h2>Isso é a base</h2>
+				<p class="fragment" style="font-size: 0.9em; margin-top: 2rem">
+					<!--					TODO: Nivel programatico: Nao programatico (Quarkus LangChain4J Agentic), Quarkus Flow DSL, Na mão... -->
+					<!--					TODO: autonomia para LLM: @SupervisorAgent, ..., na mão-->
+					<span class="quarkus-gradient">AI Services</span> resolvem muitos problemas, mas e quando o objetivo
+					exige um <span class="quarkus-gradient">workflow</span>: vários AI Services encadeados, de
+					diferentes providers, colaborando entre si até chegar ao resultado?
+				</p>
+				<aside class="notes">
+					Seria interessante a gente falar o porquê AI Services não são suficientes (falar talvez de programar
+					tudo na mão).
+					Você acaba necessitando de certos padrões de LLMs, e os Agentic Patterns suprem isso, e a gente vê
+					ferramentas
+					de mercado trazendo isso pra gente.
+
+					Esses quatro padrões são a base de qualquer sistema agênticos. Mas quando o sistema cresce —
+					falhas, estado, longa duração, humanos no meio do caminho — só esses padrões provavelmente não
+					bastam. Precisamos de algo mais adequado: é aqui que entra a orquestração com Quarkus Flow.
+				</aside>
+			</section>
+
+			<!-- Slide 6h: Transition - Agentic Systems -->
+			<section data-background-gradient="linear-gradient(to bottom, #ffffff, #dbe9f8)">
+				<h1 class="quarkus-gradient">Agentic Systems</h1>
+
+				<!--				Base > Agentic Patterns > (Workflow vs. Agents) > Quarkus Flow -->
+				<aside class="notes">
+					Transição: até aqui falamos de um único AI Service com prompts, memória, tools, RAG e guardrails.
+					Agora vamos subir um nível: sistemas agênticos, onde vários agentes colaboram para resolver um
+					problema.
+				</aside>
+			</section>
+
+			<!-- Slide: What are agentic systems -->
+			<section>
+				<h2>O que são sistemas agênticos?</h2>
+				<p style="font-size: 0.8em">
+					<span class="quarkus-gradient">Sistemas agênticos</span> usam LLMs e tools para resolver tarefas
+					complexas, e podem ir de fluxos <strong>predefinidos</strong> a sistemas
+					<strong>totalmente autônomos</strong>.
+				</p>
+				<p class="fragment" style="font-size: 0.6em; margin-top: 2rem">
+					Fonte:
+					<a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank"
+						rel="noopener">Building Effective Agents (Anthropic)</a>
+					· 19 dez 2024
+				</p>
+				<aside class="notes">
+					Não existe uma definição única de agente, então a Anthropic chama todas as variações, dos sistemas
+					mais prescritivos, que seguem workflows predefinidos, aos totalmente autônomos, de sistemas
+					agênticos. https://www.anthropic.com/engineering/building-effective-agents
+				</aside>
+			</section>
+
+			<!-- Slide: Workflows vs. Agents -->
+			<section>
+				<h2>Workflows vs. Agents</h2>
+				<p style="font-size: 0.75em">Segundo a Anthropic, dentro dos sistemas agênticos, existe uma distinção
+					arquitetural importante:</p>
+				<div
+					style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.2rem; font-size: 0.7em">
+					<div class="fragment"
+						style="background: rgba(70, 149, 235, 0.1); border-top: 4px solid var(--quarkus-blue); border-radius: 8px; padding: 1rem 1.2rem; text-align: left">
+						<p style="margin: 0 0 0.6rem; font-size: 1.3em; font-weight: 700; color: var(--quarkus-blue)">
+							Workflows</p>
+						<p style="margin: 0 0 0.8rem">
+							LLMs e tools orquestrados por <strong>caminhos de código predefinidos</strong>
+						</p>
+						<p style="margin: 0; font-size: 0.85em; opacity: 0.8">Quem decide o caminho: <strong>o seu
+								código</strong></p>
+					</div>
+					<div class="fragment"
+						style="background: rgba(255, 0, 74, 0.08); border-top: 4px solid var(--quarkus-red); border-radius: 8px; padding: 1rem 1.2rem; text-align: left">
+						<p style="margin: 0 0 0.6rem; font-size: 1.3em; font-weight: 700; color: var(--quarkus-red)">
+							Agents</p>
+						<p style="margin: 0 0 0.8rem">
+							LLMs <strong>dirigem dinamicamente</strong> o próprio processo e o uso de tools, mantendo o
+							controle de como executam a tarefa
+						</p>
+						<p style="margin: 0; font-size: 0.85em; opacity: 0.8">Quem decide o caminho: <strong>o
+								LLM</strong></p>
+					</div>
+				</div>
+				<aside class="notes">
+					Workflows são sistemas onde LLMs e tools são orquestrados por caminhos de código predefinidos.
+					Agents são sistemas onde os LLMs dirigem dinamicamente seu próprio processo e uso de tools,
+					mantendo o controle de como realizam a tarefa.
+
+					Atenção: tools existem nos dois lados. O que define um workflow é quem decide o caminho, não o uso
+					de tools.
+					- Workflow com tool: o código define a ordem dos passos, e um deles pode ser chamar o LLM com uma
+					tool ou só executar a tool. Ex.: passo 1 busca o pedido (tool), passo 2 o LLM resume, passo 3 envia
+					o e-mail (tool). O caminho é sempre o mesmo.
+					- Agent com tool: o LLM decide quais tools chamar, em que ordem e quantas vezes, até considerar a
+					tarefa concluída.
+					No LangChain4J, um AI Service com @Tool deixa o LLM escolher quando chamar aquela tool, mas o fluxo
+					em volta continua sendo código seu. Nos padrões @SequenceAgent, @ParallelAgent etc., o código é
+					quem define a orquestração.
+				</aside>
+			</section>
+
+			<!-- Slide: Workflow vs. Agents diagram (LangChain4j docs) -->
+			<section>
+				<h2>Workflows vs. Agents</h2>
+				<img src="images/workflow-vs-agents.png" alt="Workflow vs. Agents"
+					style="max-height: 55vh; margin: 1rem auto 0; border: 0; box-shadow: none" />
+				<p style="font-size: 0.5em; margin-top: 1rem">
+					Fonte:
+					<a href="https://docs.langchain4j.dev/tutorials/agents#workflow-patterns" target="_blank"
+						rel="noopener">LangChain4j Docs: Agents</a>
+				</p>
+				<aside class="notes">
+					Diagrama da documentação do LangChain4j: no workflow, LLMs e tools são orquestrados
+					programaticamente por caminhos de código predefinidos; nos agents, o LLM dirige o próprio processo
+					e o uso de tools, mantendo o controle de como executa as tarefas.
+					https://docs.langchain4j.dev/tutorials/agents#workflow-patterns
+				</aside>
+			</section>
+
+			<!-- Slide 6i: The 4 base agent patterns -->
+			<section>
+				<h2>4 padrões base de agentes</h2>
+				<div
+					style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.2rem; font-size: 0.55em">
+					<div class="fragment" style="background: rgba(0, 0, 0, 0.04); border-radius: 8px; padding: 0.9rem">
+						<p style="margin: 0 0 0.6rem"><span class="agent-type" style="font-size: 1.2em">Sequence</span>
+						</p>
+						<div style="display: flex; justify-content: center; align-items: center; gap: 0.4rem">
+							<span
+								style="background: rgba(70, 149, 235, 0.15); border: 2px solid var(--quarkus-blue); padding: 0.25rem 0.7rem; border-radius: 6px">Agent
+								A</span>
+							<span>→</span>
+							<span
+								style="background: rgba(70, 149, 235, 0.15); border: 2px solid var(--quarkus-blue); padding: 0.25rem 0.7rem; border-radius: 6px">Agent
+								B</span>
+							<span>→</span>
+							<span
+								style="background: rgba(70, 149, 235, 0.15); border: 2px solid var(--quarkus-blue); padding: 0.25rem 0.7rem; border-radius: 6px">Agent
+								C</span>
+						</div>
+						<p style="margin: 0.6rem 0 0; color: rgba(13, 28, 44, 0.6)">um após o outro, a saída vira
+							entrada</p>
+					</div>
+					<div class="fragment" style="background: rgba(0, 0, 0, 0.04); border-radius: 8px; padding: 0.9rem">
+						<p style="margin: 0 0 0.6rem"><span class="agent-type" style="font-size: 1.2em">Parallel</span>
+						</p>
+						<div style="display: flex; justify-content: center; align-items: center; gap: 0.4rem">
+							<span>→</span>
+							<span style="display: flex; flex-direction: column; gap: 0.3rem">
+								<span
+									style="background: rgba(70, 149, 235, 0.15); border: 2px solid var(--quarkus-blue); padding: 0.25rem 0.7rem; border-radius: 6px">Agent
+									A</span>
+								<span
+									style="background: rgba(70, 149, 235, 0.15); border: 2px solid var(--quarkus-blue); padding: 0.25rem 0.7rem; border-radius: 6px">Agent
+									B</span>
+							</span>
+							<span>→</span>
+						</div>
+						<p style="margin: 0.6rem 0 0; color: rgba(13, 28, 44, 0.6)">ao mesmo tempo, resultados
+							combinados</p>
+					</div>
+					<div class="fragment" style="background: rgba(0, 0, 0, 0.04); border-radius: 8px; padding: 0.9rem">
+						<p style="margin: 0 0 0.6rem"><span class="agent-type" style="font-size: 1.2em">Loop</span></p>
+						<div style="display: flex; justify-content: center; align-items: center; gap: 0.4rem">
+							<span
+								style="background: rgba(70, 149, 235, 0.15); border: 2px solid var(--quarkus-blue); padding: 0.25rem 0.7rem; border-radius: 6px">Agent</span>
+							<span style="font-size: 1.4em; color: var(--quarkus-red)">↻</span>
+							<span style="color: rgba(13, 28, 44, 0.6)">até a condição</span>
+						</div>
+						<p style="margin: 0.6rem 0 0; color: rgba(13, 28, 44, 0.6)">repete até o resultado ser bom o
+							suficiente</p>
+					</div>
+					<div class="fragment" style="background: rgba(0, 0, 0, 0.04); border-radius: 8px; padding: 0.9rem">
+						<p style="margin: 0 0 0.6rem"><span class="agent-type"
+								style="font-size: 1.2em">Conditional</span></p>
+						<div style="display: flex; justify-content: center; align-items: center; gap: 0.4rem">
+							<span
+								style="background: rgba(255, 0, 74, 0.08); border: 2px solid var(--quarkus-red); padding: 0.25rem 0.7rem; border-radius: 6px; color: var(--quarkus-red)">condição?</span>
+							<span>→</span>
+							<span style="display: flex; flex-direction: column; gap: 0.3rem">
+								<span
+									style="background: rgba(70, 149, 235, 0.15); border: 2px solid var(--quarkus-blue); padding: 0.25rem 0.7rem; border-radius: 6px">Agent
+									A</span>
+								<span
+									style="background: rgba(70, 149, 235, 0.15); border: 2px solid var(--quarkus-blue); padding: 0.25rem 0.7rem; border-radius: 6px">Agent
+									B</span>
+							</span>
+						</div>
+						<p style="margin: 0.6rem 0 0; color: rgba(13, 28, 44, 0.6)">o caminho depende de uma condição
+						</p>
+					</div>
+				</div>
+				<aside class="notes">
+					Os quatro padrões base de sistemas agênticos: Sequence (agentes em série, a saída de um vira
+					entrada do outro), Parallel (agentes ao mesmo tempo, com resultados combinados), Loop (repete um
+					agente até uma condição ser satisfeita) e Conditional (escolhe o agente conforme uma condição).
+				</aside>
+			</section>
+
+			<!-- Slides: SequenceAgent code example, agent by agent -->
+			<section data-auto-animate>
+				<h2 data-id="sequence-title">1º agente: <span class="agent-type">CreativeWriter</span></h2>
+				<pre data-id="sequence-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
+					style="max-height: 460px" class="java" data-trim data-line-numbers="|4|5-8|9-13|14">
+@RegisterAiService
+public interface CreativeWriter {
+
+    @Agent(name = "Creative writer", description = "Draft a short story about a topic.", outputKey = "story")
+    @SystemMessage("""
+            You are a creative fiction writer.
+            Write short, vivid stories, 4–6 sentences long.
+            """)
+    @UserMessage("""
+            Topic: {topic}
+
+            Write a short story about this topic.
+            """)
+    String draft(@V("topic") String topic);
+}
+				</code></pre>
+				<aside class="notes">
+					Primeiro agente da sequência: o CreativeWriter recebe o tópico e escreve o rascunho da
+					história. Repare no outputKey "story": é nele que o resultado é gravado, e é daí que o próximo
+					agente vai ler.
+				</aside>
+			</section>
+
+			<section data-auto-animate>
+				<h2 data-id="sequence-title">2º agente: <span class="agent-type">AudienceEditor</span></h2>
+				<pre data-id="sequence-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
+					style="max-height: 460px" class="java" data-trim data-line-numbers="|4|10,14|16">
+@RegisterAiService
+public interface AudienceEditor {
+
+    @Agent(name = "Audience editor", description = "Adapt story to a target audience.", outputKey = "story")
+    @SystemMessage("""
+            You rewrite stories to better fit the target audience.
+            Keep structure similar but adjust language, tone, and difficulty.
+            """)
+    @UserMessage("""
+            Audience: {audience}
+
+            Rewrite the story below so it is ideal for this audience.
+            Story:
+            {story}
+            """)
+    String adapt(@V("story") String story, @V("audience") String audience);
+}
+				</code></pre>
+				<aside class="notes">
+					Segundo agente: o AudienceEditor recebe a história gerada pelo CreativeWriter (via {story}) e a
+					reescreve para o público-alvo. Ele escreve no mesmo outputKey "story", sobrescrevendo o estado
+					para o próximo agente.
+				</aside>
+			</section>
+
+			<section data-auto-animate>
+				<h2 data-id="sequence-title">3º agente: <span class="agent-type">StyleEditor</span></h2>
+				<pre data-id="sequence-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
+					style="max-height: 460px" class="java" data-trim data-line-numbers="|4|11,15|17">
+@RegisterAiService
+public interface StyleEditor {
+
+    @Agent(name = "Style editor", description = "Adapt story to a specific writing style.", outputKey = "story")
+    @SystemMessage("""
+            You rewrite stories in the requested writing style
+            (for example: fantasy, noir, comedy, sci-fi).
+            Keep the meaning, adjust style.
+            """)
+    @UserMessage("""
+            Style: {style}
+
+            Rewrite the story below with this style.
+            Story:
+            {story}
+            """)
+    String restyle(@V("story") String story, @V("style") String style);
+}
+				</code></pre>
+				<aside class="notes">
+					Terceiro agente: o StyleEditor pega a história já adaptada ao público e a reescreve no estilo
+					pedido (fantasia, noir, comédia...). Mesmo mecanismo: lê {story}, grava em "story".
+				</aside>
+			</section>
+
+			<section data-auto-animate>
+				<h2 data-id="sequence-title"><span class="agent-type">@SequenceAgent</span></h2>
+				<pre data-id="sequence-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
+					style="max-height: 460px" class="java" data-trim data-line-numbers="|4-5|6">
+@RegisterAiService
+public interface StoryCreatorWithConfigurableStyleEditor {
+
+    @SequenceAgent(outputKey = "story", subAgents = { CreativeWriter.class, AudienceEditor.class,
+            StyleEditor.class })
+    String write(@V("topic") String topic, @V("style") String style, @V("audience") String audience);
+}
+				</code></pre>
+				<aside class="notes">
+					E por fim o orquestrador: @SequenceAgent declara os três sub-agentes na ordem de execução
+					(CreativeWriter → AudienceEditor → StyleEditor). Como todos compartilham o outputKey "story", a
+					saída de um vira a entrada do próximo. Um único método write() dispara a sequência inteira.
+				</aside>
+			</section>
+
+			<!-- Slides: ParallelAgent code example, agent by agent -->
+			<section data-auto-animate data-auto-animate-id="parallel">
+				<h2 data-id="parallel-title">@ParallelAgent: <span class="agent-type">DinnerAgent</span></h2>
+				<pre data-id="parallel-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
+					style="max-height: 460px" class="java" data-trim data-line-numbers="|4|10-11|15">
+@RegisterAiService
+public interface DinnerAgent {
+
+    @Agent(name = "Dinner planner", outputKey = "dinner")
+    @SystemMessage("""
+            You suggest a single, concrete dinner option in the given city
+            for a given mood. Be specific and short.
+            """)
+    @UserMessage("""
+            City: {city}
+            Mood: {mood}
+
+            Suggest where to have dinner (one place, one sentence).
+            """)
+    String suggestDinner(@V("city") String city, @V("mood") Mood mood);
+}
+				</code></pre>
+				<aside class="notes">
+					Agora o padrão Parallel. O DinnerAgent sugere onde jantar a partir da cidade e do mood. Repare
+					que aqui cada agente tem seu próprio outputKey ("dinner") — diferente do Sequence, eles não
+					encadeiam saída, cada um escreve numa chave separada.
+				</aside>
+			</section>
+
+			<section data-auto-animate data-auto-animate-id="parallel">
+				<h2 data-id="parallel-title">@ParallelAgent: <span class="agent-type">DrinksAgent</span></h2>
+				<pre data-id="parallel-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
+					style="max-height: 460px" class="java" data-trim data-line-numbers="|4|9-10|14">
+@RegisterAiService
+public interface DrinksAgent {
+
+    @Agent(name = "Drinks planner", outputKey = "drinks")
+    @SystemMessage("""
+            You suggest one place for drinks after dinner, matching the mood.
+            """)
+    @UserMessage("""
+            City: {city}
+            Mood: {mood}
+
+            Suggest where to have a drink (one place, one sentence).
+            """)
+    String suggestDrinks(@V("city") String city, @V("mood") Mood mood);
+}
+				</code></pre>
+				<aside class="notes">
+					O DrinksAgent sugere onde tomar um drink depois do jantar. Mesmas entradas (city e mood), mas
+					escreve no seu próprio outputKey "drinks". Como ele não depende da saída dos outros, pode rodar
+					ao mesmo tempo.
+				</aside>
+			</section>
+
+			<section data-auto-animate data-auto-animate-id="parallel">
+				<h2 data-id="parallel-title">@ParallelAgent: <span class="agent-type">ActivityAgent</span></h2>
+				<pre data-id="parallel-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
+					style="max-height: 460px" class="java" data-trim data-line-numbers="|4|9-10|14">
+@RegisterAiService
+public interface ActivityAgent {
+
+    @Agent(name = "Activity planner", outputKey = "activity")
+    @SystemMessage("""
+            You suggest one short activity to wrap up the evening.
+            """)
+    @UserMessage("""
+            City: {city}
+            Mood: {mood}
+
+            Suggest one activity, after dinner and drinks, to finish the evening.
+            """)
+    String suggestActivity(@V("city") String city, @V("mood") Mood mood);
+}
+				</code></pre>
+				<aside class="notes">
+					O ActivityAgent fecha a noite sugerindo uma atividade. Terceiro agente independente, com
+					outputKey "activity". Três agentes, três chaves: dinner, drinks e activity.
+				</aside>
+			</section>
+
+			<section data-auto-animate data-auto-animate-id="parallel">
+				<h2 data-id="parallel-title"><span class="agent-type">@ParallelAgent</span></h2>
+				<pre data-id="parallel-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
+					style="max-height: 460px" class="java" data-trim data-line-numbers="|13|4-11|5-6|14">
+@RegisterAiService
+public interface EveningPlannerAgent {
+
+    @Output
+    static EveningPlan toEveningPlan(@V("city") String city, @V("mood") Mood mood, @V("dinner") String dinner,
+            @V("drinks") String drinks, @V("activity") String activity) {
+
+        return new EveningPlan(requireNonNullElse(city, "unknown city"), mood != null ? mood : Mood.CHILL,
+                requireNonNullElse(dinner, "surprise dinner"), requireNonNullElse(drinks, "surprise drinks"),
+                requireNonNullElse(activity, "surprise activity"));
+    }
+
+    @ParallelAgent(outputKey = "plan", subAgents = { DinnerAgent.class, DrinksAgent.class, ActivityAgent.class })
+    EveningPlan plan(@V("city") String city, @V("mood") Mood mood);
+}
+				</code></pre>
+				<aside class="notes">
+					E o orquestrador: @ParallelAgent executa os três sub-agentes ao mesmo tempo. Como cada um
+					escreveu numa chave diferente, precisamos combinar os resultados: o método @Output é o
+					post-processor que lê dinner, drinks e activity do escopo e monta o EveningPlan final. Um único
+					plan(city, mood) dispara tudo em paralelo.
+				</aside>
+			</section>
+
+			<!-- Slides: LoopAgent code example, agent by agent -->
+			<section data-auto-animate data-auto-animate-id="loop">
+				<h2 data-id="loop-title">@LoopAgent: <span class="agent-type">StyleScorer</span></h2>
+				<pre data-id="loop-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
+					style="max-height: 460px" class="java" data-trim data-line-numbers="|10|4-5|11">
+public interface StyleScorer {
+    @UserMessage("""
+            You are a critical reviewer.
+            Give a review score between 0.0 and 1.0 for the following story
+            based on how well it aligns with the style '{{style}}'.
+            Return only the score and nothing else.
+
+            The story is: "{{story}}"
+            """)
+    @Agent(description = "Score a story based on how well it aligns with a given style", outputKey = "score")
+    double scoreStyle(@V("story") String story, @V("style") String style);
+}
+				</code></pre>
+				<aside class="notes">
+					Agora o padrão Loop. O StyleScorer é o crítico: avalia a história e devolve uma nota de 0.0 a
+					1.0 indicando o quanto ela está alinhada ao estilo pedido. A nota é gravada no outputKey
+					"score" — é ela que vai decidir se o loop continua ou para.
+				</aside>
+			</section>
+
+			<section data-auto-animate data-auto-animate-id="loop">
+				<h2 data-id="loop-title">@LoopAgent: <span class="agent-type">StyleEditor</span></h2>
+				<pre data-id="loop-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
+					style="max-height: 460px" class="java" data-trim data-line-numbers="|9|4-5|10">
+public interface StyleEditor {
+    @UserMessage("""
+            You are a professional editor.
+            Analyze and rewrite the following story to better fit and be
+            more coherent with the {{style}} style.
+            Return only the story and nothing else.
+            The story is "{{story}}".
+            """)
+    @Agent(description = "Edit a story to better fit a given style", outputKey = "story")
+    String editStory(@V("story") String story, @V("style") String style);
+}
+				</code></pre>
+				<aside class="notes">
+					O StyleEditor é quem melhora: reescreve a história para ficar mais coerente com o estilo e
+					grava o resultado de volta em "story". Crítico avalia, editor melhora — e a história revisada
+					volta para o crítico na próxima iteração.
+				</aside>
+			</section>
+
+			<section data-auto-animate data-auto-animate-id="loop">
+				<h2 data-id="loop-title"><span class="agent-type">@LoopAgent</span></h2>
+				<pre data-id="loop-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
+					style="max-height: 460px" class="java" data-trim data-line-numbers="|10-12|4-8|7|13">
+@RegisterAiService
+public interface StyleReviewLoopAgentWithCounter {
+
+    @ExitCondition(testExitAtLoopEnd = true)
+    static boolean exit(@V("score") double score, @LoopCounter int loopCounter) {
+        loopCount.set(loopCounter);
+        return score >= 0.8;
+    }
+
+    @LoopAgent(description = "Review the given story to ensure it aligns with the specified style",
+            outputKey = "story", maxIterations = 5,
+            subAgents = { StyleScorer.class, StyleEditor.class })
+    String write(@V("story") String story);
+}
+				</code></pre>
+				<aside class="notes">
+					E o orquestrador: @LoopAgent executa StyleScorer → StyleEditor repetidamente. A cada iteração,
+					o @ExitCondition lê o "score" gravado pelo crítico: se chegou a 0.8, o loop para e devolve a
+					história. O maxIterations = 5 é a rede de segurança para não iterar para sempre, e o
+					@LoopCounter informa em qual iteração estamos.
+				</aside>
+			</section>
+
+			<!-- Slide: ConditionalAgent code example -->
+			<section>
+				<h2><span class="agent-type">@ConditionalAgent</span></h2>
+				<pre style="width: 120%; margin-left: -10%; font-size: 0.45em"><code style="max-height: 460px"
+																																						 class="java" data-trim data-line-numbers="|25-27|4-7|9-13|15-18|20-23|28">
+@RegisterAiService
+public interface ExpertsAgent {
+
+    @ActivationCondition(MedicalExpert.class)
+    static boolean activateMedical(@V("category") RequestCategory category) {
+        return category == RequestCategory.MEDICAL;
+    }
+
+    @ActivationCondition(LegalExpert.class)
+    static boolean activateLegal(AgenticScope agenticScope) {
+        return agenticScope.readState("category", RequestCategory.UNKNOWN)
+                == RequestCategory.LEGAL;
+    }
+
+    @ActivationCondition(TechnicalExpert.class)
+    static boolean activateTechnical(@V("category") RequestCategory category) {
+        return category == RequestCategory.TECHNICAL;
+    }
+
+    @ActivationCondition(UnknownExpert.class)
+    static boolean activateUnknown(@V("category") RequestCategory category) {
+        return category == RequestCategory.UNKNOWN;
+    }
+
+    @ConditionalAgent(outputKey = "response",
+            subAgents = { MedicalExpert.class, LegalExpert.class,
+                    TechnicalExpert.class, UnknownExpert.class })
+    String askExpert(@V("request") String request);
+}
+				</code></pre>
+				<aside class="notes">
+					Por fim, o padrão Conditional: o @ConditionalAgent declara quatro especialistas (médico,
+					jurídico, técnico e desconhecido), mas só executa aqueles cuja @ActivationCondition retornar
+					true. Cada condição lê a "category" do escopo — via @V ou via AgenticScope.readState, como no
+					LegalExpert — e decide se aquele expert é ativado. É um roteador: a pergunta vai direto para o
+					especialista certo, e a resposta é gravada em "response".
+				</aside>
+			</section>
+
+
+			<!-- Slide 4: Agent Types -->
+			<section>
+				<h2>Padrões de Agentes</h2>
+				<ul style="font-size: 0.75em; text-align: left">
+					<li class="fragment" data-fragment-index="0">
+						<span class="agent-type">@SequenceAgent</span> permite você executar agentes de forma sequencial
+					</li>
+					<li class="fragment" data-fragment-index="0">
+						<span class="agent-type">@ParallelAgent</span> permite você executar diversos agentes ao mesmo
+						tempo
+					</li>
+					<li class="fragment" data-fragment-index="0">
+						<span class="agent-type">@LoopAgent</span> como um for-loop no Java, permite você executar
+						agentes até uma dada condição for satisfeita
+					</li>
+					<li class="fragment" data-fragment-index="0">
+						<span class="agent-type">@ConditionalAgent</span> permite você dado uma condição utilizar ou não
+						um agente
+					</li>
+					<li class="fragment" data-fragment-index="1">
+						<span class="agent-type">@HumanInTheLoop</span> permite de forma programática pegar um input ou
+						feedback de um humano
+					</li>
+					<li class="fragment" data-fragment-index="2">
+						<span class="agent-type">Non-AI agents</span> permite com que você escreva código para performar
+						alguma tarefa
+					</li>
+				</ul>
+				<aside class="notes">
+					Diferentes tipos de agents disponíveis: sequencial, paralelo, loop, condicional, human-in-the-loop e
+					non-AI agents.
+				</aside>
+			</section>
+
+			<!-- Slides 16-20 from quarkus-flow-orquestrando-complexidade-e-agentes-de-ia -->
+			<!-- Slide: Quarkus Flow features -->
+			<!-- Slide 13 from quarkus-flow-orquestrando-complexidade-e-agentes-de-ia -->
+			<section data-background-gradient="linear-gradient(to bottom, #ffffff, #dbe9f8)">
+				<img src="images/quarkus-logo.png">
+				<h1>Quarkus Flow</h1>
+				<aside class="notes">
+					Apresentando o Quarkus Flow - a solução para orquestração explícita de workflows.
+				</aside>
+			</section>
+
+
+			<section>
+				<h2>Quarkus Flow</h2>
+				<p class="fragment" style="font-size: 0.85em">Quarkus Flow é Workflow Engine para Quarkus:</p>
+				<ul style="font-size: 0.8em">
+					<li class="fragment">
+						Gerenciamento de estado, controle de fluxo, chamadas remotas, mensageria, resiliência,
+						observabilidade, etc.
+					</li>
+					<li class="fragment">
+						Permite Human-in-the-Loop (HITL) e Agentic patterns
+					</li>
+					<li class="fragment">
+						Permite a criação de workflows duráveis (Durable Workflows)
+					</li>
+					<li class="fragment">
+						Deixa sua lógica de negócio limpa e orquestra a complexidade para você
+					</li>
+				</ul>
+				<aside class="notes">
+					Quarkus Flow oferece gerenciamento completo de workflows com estado, resiliência, observabilidade e
+					suporte a padrões modernos como HITL e agentes.
+				</aside>
+			</section>
+
+			<!-- Slide: Open Workflow Specification -->
+			<section>
+				<h2>Open Workflow Specification</h2>
+				<ul style="font-size: 0.85em">
+					<li class="fragment">Projeto CNCF Sandbox (candidatando-se à incubação este ano)</li>
+					<li class="fragment">Ecossistema neutro em relação a fornecedores (vendor-neutral)</li>
+					<li class="fragment">Integração fluida com arquiteturas modernas</li>
+					<li class="fragment">
+						Padrões suportados: CloudEvents, AsyncAPI, gRPC, OpenAPI, A2A, MCP e outros
+					</li>
+				</ul>
+				<aside class="notes">
+					Baseado na especificação Serverless Workflow da CNCF, que é vendor-neutral e suporta diversos
+					padrões modernos.
+				</aside>
+			</section>
+
+			<!-- Slide: Code Example - Java DSL -->
+			<section>
+				<h2 data-id="code-title">Java DSL</h2>
+
+				<pre><code class="java" data-trim data-line-numbers="|1-2|3-11">
+@ApplicationScoped
+public class EmitFlow extends Flow {
+  @Override
+  public Workflow descriptor() {
+    return workflow("emit", "test")
+      .tasks(
+        emit("com.petstore.order.placed.v1")
+          .source("https://petstore.com")
+          .jsonData(Order.class))
+      .build();
+  }
+}
+					</code></pre>
+				<aside class="notes">
+					Exemplo de definição de workflow usando Java DSL. Esta é uma forma programática de definir workflows
+					seguindo a especificação Serverless Workflow.
+				</aside>
+			</section>
+
+			<!-- Slide: Code Example - YAML Definition -->
+			<section>
+				<h2>YAML Definition</h2>
+				<pre>
+						<code class="yaml" data-trim data-line-numbers="|1-5|6|7|8-19">
+document:
+  dsl: '1.0.3'
+  namespace: test
+  name: emit
+  version: '0.1.0'
+  do:
+    - emitEvent:
+        emit:
+          event:
+            with:
+              source: https://petstore.com
+              type: com.petstore.order.placed.v1
+              data:
+                client:
+                  firstName: Cruella
+                  lastName: de Vil
+                items:
+                  - breed: dalmatian
+                    quantity: 101
+					</code>
+				</pre>
+			</section>
+
+			<!-- Slide: Architecture -->
+			<section>
+				<h2>Arquitetura e Ecossistema</h2>
+				<div class="architecture-diagram" style="font-size: 0.7em">
+
+					<div id="benefits"
+						style="text-align: left; max-width: 800px; margin-left: auto; margin-right: auto;">
+						<p><strong>Integração nativa com a infraestrutura Quarkus</strong></p>
+						<p><strong>Arquitetura plugável</strong></p>
+					</div>
+					<div
+						style="margin-top: 1rem; text-align: left; max-width: 800px; margin-left: auto; margin-right: auto">
+						<div
+							style="text-align: center; background: rgba(13, 28, 44, 0.10); padding: 0.5rem; margin: 0.3rem; border-radius: 5px">
+							<strong>Quarkus Flow</strong>
+						</div>
+						<div
+							style="text-align: center; background: rgba(13, 28, 44, 0.07); padding: 0.5rem; margin: 0.3rem; border-radius: 5px">
+							<strong>Java SDK / DSL</strong> (Engine)
+						</div>
+						<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin: 0.3rem">
+							<div style="background: rgba(13, 28, 44, 0.07); padding: 0.5rem; border-radius: 5px">
+								<strong>Persistence</strong><br />Redis/JPA
+							</div>
+							<div style="background: rgba(13, 28, 44, 0.07); padding: 0.5rem; border-radius: 5px">
+								<strong>Messaging</strong><br />Any
+							</div>
+							<div style="background: rgba(13, 28, 44, 0.07); padding: 0.5rem; border-radius: 5px">
+								<strong>Smallrye Fault Tolerance</strong><br />
+							</div>
+						</div>
+						<div
+							style="background: rgba(13, 28, 44, 0.14); padding: 0.5rem; margin: 0.3rem; border-radius: 5px">
+							<strong>Quarkus Infrastructure</strong> (Arc, HTTP, etc.)
+						</div>
+					</div>
+				</div>
+				<aside class="notes">
+					Arquitetura plugável que se integra nativamente com Quarkus. Você escolhe apenas os componentes que
+					precisa: persistência, mensageria, tolerância a falhas, etc.
+				</aside>
+			</section>
+
+
+
+			<!-- Slide: Quarkus Flow superpowers for LangChain4j -->
+			<section>
+				<h2><span class="quarkus-gradient">Quarkus Flow</span> + LangChain4J</h2>
+				<p style="font-size: 0.75em">
+					O Quarkus Flow é a camada de orquestração <strong>durável</strong> e <strong>observável</strong>
+					dos seus agents:
+				</p>
+				<div
+					style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-top: 1.2rem; font-size: 0.6em">
+					<div class="fragment"
+						style="background: rgba(70, 149, 235, 0.1); border-top: 4px solid var(--quarkus-blue); border-radius: 8px; padding: 1rem 1.1rem; text-align: left">
+						<p style="margin: 0 0 0.6rem; font-size: 1.2em; font-weight: 700; color: var(--quarkus-blue)">
+							Durabilidade</p>
+						<p style="margin: 0">Loops agênticos de longa duração <strong>sobrevivem a restarts</strong> da
+							aplicação</p>
+					</div>
+					<div class="fragment"
+						style="background: rgba(255, 0, 74, 0.08); border-top: 4px solid var(--quarkus-red); border-radius: 8px; padding: 1rem 1.1rem; text-align: left">
+						<p style="margin: 0 0 0.6rem; font-size: 1.2em; font-weight: 700; color: var(--quarkus-red)">
+							Observabilidade</p>
+						<p style="margin: 0"><strong>Traces</strong>, logs e visualizadores no <strong>Dev UI</strong>
+							para cada execução</p>
+					</div>
+					<div class="fragment"
+						style="background: rgba(70, 149, 235, 0.1); border-top: 4px solid var(--quarkus-blue); border-radius: 8px; padding: 1rem 1.1rem; text-align: left">
+						<p style="margin: 0 0 0.6rem; font-size: 1.2em; font-weight: 700; color: var(--quarkus-blue)">
+							Integração</p>
+						<p style="margin: 0">Misture tasks de IA com <strong>HTTP</strong>, <strong>mensageria</strong>
+							e eventos agendados</p>
+					</div>
+				</div>
+				<p class="fragment" style="font-size: 0.5em; margin-top: 1.5rem">
+					Baseado na Open Workflow Specification (CNCF sandbox) ·
+					<a href="https://docs.quarkiverse.io/quarkus-flow/dev/langchain4j.html" target="_blank"
+						rel="noopener">docs.quarkiverse.io/quarkus-flow</a>
+				</p>
+				<aside class="notes">
+					O LangChain4j dá boas abstrações para falar com LLMs e definir agents, mas processos de IA raramente
+					vivem isolados: precisam chamar serviços externos, pausar para aprovação humana e sobreviver a
+					restarts. O Quarkus Flow age como a camada de orquestração durável e observável: durabilidade,
+					observabilidade e integração com HTTP, mensageria e eventos agendados. Lembrar que a integração
+					quarkus-flow-langchain4j está em Preview.
+				</aside>
+			</section>
+
+			<!-- Slide: Option 1 - Java DSL calling AI Services as functions -->
+			<section>
+				<h2><span class="quarkus-gradient">Opção 1:</span> Java DSL + AI Services</h2>
+				<pre style="width: 120%; margin-left: -10%; font-size: 0.42em"><code
+					style="max-height: 480px" class="java" data-trim data-line-numbers="|1-11|13-27|22">
+@RegisterAiService
+@ApplicationScoped
+@SystemMessage("""
+        You draft a short, friendly newsletter paragraph.
+        Return ONLY the final draft text (no extra markup).
+        """)
+public interface DrafterAgent {
+
+    @UserMessage("Brief:\n{{brief}}")
+    String draft(@MemoryId String memoryId, @V("brief") String brief);
+}
+
+@ApplicationScoped
+public class NewsletterFlow extends Flow {
+
+    @Inject
+    DrafterAgent drafterAgent;
+
+    @Override
+    public Workflow descriptor() {
+        return workflow("newsletter-drafter")
+            .tasks(agent("draftAgent", drafterAgent::draft, String.class))
+            .build();
+    }
+}
+				</code></pre>
+				<aside class="notes">
+					Primeira opção: você escreve o workflow na Java DSL e chama os seus AI Services como uma function.
+					Primeiro o AI Service de sempre, o DrafterAgent, com @RegisterAiService e as mensagens. Depois o
+					Flow: injetamos o agent e usamos a task agent(nome, metodo, tipo). Com inputFrom você escolhe o que
+					o agent enxerga do contexto do workflow, e com exportAs o que ele devolve para o próximo passo.
+					Fonte: https://docs.quarkiverse.io/quarkus-flow/dev/langchain4j.html
+				</aside>
+			</section>
+
+			<!-- Slide: What you get without rewriting anything -->
+			<section>
+				<h2><span class="quarkus-gradient">Opção 2:</span> sem reescrever seus agents</h2>
+				<ul style="font-size: 0.75em; text-align: left">
+					<li class="fragment">
+						Seus <span class="agent-type">@SequenceAgent</span>, <span
+							class="agent-type">@ParallelAgent</span>,
+						<span class="agent-type">@LoopAgent</span> e <span class="agent-type">@ConditionalAgent</span>
+						viram <strong>workflows</strong> automaticamente, em build-time
+					</li>
+					<li class="fragment">
+						Ganham as mesmas capacidades de um workflow escrito na mão: <span
+							class="agent-type">Observabilidade</span>, <span class="agent-type">Durabilidade</span>,
+						<span class="agent-type">DevUI</span> e outros.
+					</li>
+				</ul>
+				<aside class="notes">
+					Em build-time, o Quarkus Flow traduz as anotações do LangChain4j em definições de workflow padrão:
+					@SequenceAgent vira uma sequência de tasks, @ParallelAgent vira fork/join. Por isso elas ganham o
+					mesmo tracing e Dev UI de um workflow escrito na mão. O AgenticScope do LangChain4j é mapeado para o
+					contexto do workflow, então tasks de HTTP ou mensageria conseguem ler e escrever nele sem conversão.
+					Com inputFrom e exportAs você escolhe o que cada agent enxerga.
+					Fontes: https://docs.quarkiverse.io/quarkus-flow/dev/langchain4j.html e
+					https://docs.quarkiverse.io/quarkus-flow/dev/concepts-agentic-langchain4j.html
+				</aside>
+			</section>
+
+			<!-- Slide 6: Demo -->
+			<section data-background-gradient="linear-gradient(to bottom, #ffffff, #dbe9f8)">
+				<h1 class="quarkus-gradient">DEMO</h1>
+			</section>
+
+			<!-- Slide 7: Call to Action -->
+			<section>
+				<h2>Experimente!</h2>
+				<ul style="font-size: 0.9em">
+					<li><a target="_blank" href="https://open-workflow-specification.org">Open Workflow
+							Specification</a></li>
+					<li><a target="_blank" href="https://docs.quarkiverse.io/quarkus-flow/dev/index.html">Quarkus Flow
+							Documentation</a></li>
+					<li><a target="_blank" href="https://github.com/quarkiverse/quarkus-flow">Quarkus Flow GitHub</a>
+					</li>
+					<li><a target="_blank" href="https://github.com/quarkiverse/quarkus-flow/tree/main/examples">Quarkus
+							Flow Examples</a></li>
+					<li><a target="_blank" href="https://docs.quarkiverse.io/quarkus-langchain4j/dev/index.html">Quarkus
+							LangChain4J Documentation</a></li>
+					<li><a target="_blank" href="https://github.com/quarkiverse/quarkus-langchain4j">Quarkus LangChain4J
+							GitHub</a></li>
+					<li><a target="_blank" href="https://github.com/omatheusmesmo/incident-response-sre">DEMO: Incident
+							Response SRE</a></li>
+				</ul>
+				<aside class="notes">
+					Links para recursos: documentação, GitHub, demos e especificação Serverless Workflow.
+				</aside>
+			</section>
+
+			<!-- Slide: QR code for the slides -->
+			<section>
+				<h2>Acesse os slides</h2>
+				<img src="images/slides-qrcode.svg" alt="QR code dos slides"
+					style="width: 320px; height: 320px; margin: 1rem auto 0; border: 0; box-shadow: none" />
+				<p style="font-size: 0.5em; margin-top: 1rem">
+					<a href="https://mathecruz.github.io/talks/slides/agentic-workflows-com-quarkus-flow-e-langchain4j.html"
+						target="_blank" rel="noopener">mathecruz.github.io/talks</a>
+				</p>
+				<aside class="notes">
+					QR code para acessar os slides:
+					https://mathecruz.github.io/talks/slides/agentic-workflows-com-quarkus-flow-e-langchain4j.html
+				</aside>
+			</section>
+
+			<!-- Slide 8a: Speaker Bio - Matheus Cruz -->
+			<section>
+				<h2>Matheus Cruz</h2>
+				<div style="display: grid; grid-template-columns: 240px 1fr 200px; align-items: center; gap: 2rem; width: 95%; margin: 1.5rem auto 0">
+					<img src="images/mathecruz.jpeg" alt="Matheus Cruz"
+						style="width: 240px; height: 240px; margin: 0; border-radius: 50%; object-fit: cover; object-position: 35% center; border: 0; box-shadow: 0 6px 24px rgba(13, 28, 44, 0.3)" />
+					<ul style="font-size: 0.52em; margin: 0; list-style: none; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 0.9rem">
+						<li>Sr. Software Engineer na IBM</li>
+						<li>Quarkus and Quarkus Flow contributor</li>
+						<li>CNCF Open Workflow Specification (SDK Java) contributor</li>
+						<li>Quarkus Club Coordinator</li>
+						<li>Dapr Meteor</li>
+					</ul>
+					<div>
+						<a href="https://www.linkedin.com/in/mathecruz1/" target="_blank" rel="noopener">
+							<img src="images/linkedin-qrcode.svg" alt="QR code do LinkedIn"
+								style="width: 200px; height: 200px; margin: 0; border: 0; box-shadow: none" />
+						</a>
+						<p style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.6em; margin: 0.6rem 0 0">
+							<img src="images/linkedin-logo.svg" alt="LinkedIn"
+								style="height: 1.3em; width: auto; margin: 0; border: 0; box-shadow: none; background: none" />
+						</p>
+					</div>
+				</div>
+				<div style="display: flex; justify-content: center; gap: 2.5rem; margin-top: 2rem; font-size: 0.6em">
+					<a href="https://quarkus.guru" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.5rem; color: inherit; text-decoration: none">
+						<img src="images/quarkus-guru-logo.svg" alt="" style="height: 1.3em; width: auto; margin: 0; border: 0; box-shadow: none; background: none" />quarkus.guru</a>
+					<a href="https://matheuscruz.dev" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.5rem; color: inherit; text-decoration: none">
+						<img src="images/matheuscruz-dev-favicon.jpeg" alt="" style="height: 1.3em; width: 1.3em; margin: 0; border: 0; border-radius: 50%; object-fit: cover; box-shadow: none; background: none" />matheuscruz.dev</a>
+					<a href="https://github.com/mathecruz" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.5rem; color: inherit; text-decoration: none">
+						<img src="images/github-logo.svg" alt="" style="height: 1.3em; width: auto; margin: 0; border: 0; box-shadow: none; background: none" />mathecruz</a>
+				</div>
+				<aside class="notes">
+					Informações sobre o palestrante.
+				</aside>
+			</section>
+
+			<!-- Slide 8b: Speaker Bio - Matheus Oliveira -->
+			<section>
+				<h2>Matheus Oliveira</h2>
+				<div style="display: grid; grid-template-columns: 240px 1fr 200px; align-items: center; gap: 2rem; width: 95%; margin: 1.5rem auto 0">
+					<img src="images/omatheusmesmo.jpeg" alt="Matheus Oliveira"
+						style="width: 240px; height: 240px; margin: 0; border-radius: 50%; object-fit: cover; border: 0; box-shadow: 0 6px 24px rgba(13, 28, 44, 0.3)" />
+					<ul style="font-size: 0.52em; margin: 0; list-style: none; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 0.9rem">
+						<li>Software Engineer @ Act | BMW</li>
+						<li>Oracle ACE Associate</li>
+						<li>Ajudo devs Java a dominar o "Quarkus Way", para construírem aplicações de alta performance e se tornarem engenheiros mais valorizados</li>
+					</ul>
+					<div>
+						<a href="https://news.omatheusmesmo.dev" target="_blank" rel="noopener">
+							<img src="images/news-links-qrcode.svg" alt="QR code do ebook e mentoria"
+								style="width: 200px; height: 200px; margin: 0; border: 0; box-shadow: none" />
+						</a>
+						<p style="font-size: 0.55em; margin: 0.6rem 0 0">Ebook + mentoria gratuitos</p>
+					</div>
+				</div>
+				<div style="display: flex; justify-content: center; gap: 2.5rem; margin-top: 2rem; font-size: 0.6em">
+					<a href="https://blog.omatheusmesmo.dev" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.5rem; color: inherit; text-decoration: none">
+						<img src="images/omatheusmesmo.jpeg" alt="" style="height: 1.3em; width: 1.3em; margin: 0; border: 0; border-radius: 50%; object-fit: cover; box-shadow: none; background: none" />blog.omatheusmesmo.dev</a>
+					<a href="https://github.com/omatheusmesmo" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.5rem; color: inherit; text-decoration: none">
+						<img src="images/github-logo.svg" alt="" style="height: 1.3em; width: auto; margin: 0; border: 0; box-shadow: none; background: none" />omatheusmesmo</a>
+				</div>
+				<aside class="notes">
+					Informações sobre o palestrante Matheus Oliveira.
+				</aside>
+			</section>
+		</div>
+
+		<div class="github-badge">
+			<svg viewBox="0 0 16 16" aria-hidden="true">
+				<path
+					d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
+			</svg>
+			<span>mathecruz</span>
+		</div>
+
+		<img class="quarkus-logo-badge" src="images/quarkus-logo.png" alt="Quarkus" />
+	</div>
+
+	<script src="dist/reveal.js"></script>
+	<script src="dist/plugin/zoom.js"></script>
+	<script src="dist/plugin/notes.js"></script>
+	<script src="dist/plugin/search.js"></script>
+	<script src="dist/plugin/markdown.js"></script>
+	<script src="dist/plugin/highlight.js"></script>
+	<script>
+		Reveal.initialize({
+			controls: true,
+			progress: true,
+			center: true,
+			hash: true,
+			slideNumber: 'c/t',
+			showSlideNumber: 'all',
+
+			// Learn about plugins: https://revealjs.com/plugins/
+			plugins: [RevealZoom, RevealNotes, RevealSearch, RevealMarkdown, RevealHighlight],
+		});
+
+		// Centered slides can land on a half pixel (top: 78.5px). Under the deck's
+		// scale() transform that renders the text blurry, so snap top to whole
+		// device pixels.
+		function snapSlideTop() {
+			const slide = Reveal.getCurrentSlide();
+			if (!slide || !slide.style.top) return;
+			const scale = Reveal.getScale() * (window.devicePixelRatio || 1);
+			const top = parseFloat(slide.style.top);
+			slide.style.top = Math.round(top * scale) / scale + 'px';
+		}
+		['ready', 'slidechanged', 'resize'].forEach((evt) => Reveal.on(evt, () => setTimeout(snapSlideTop, 0)));
+	</script>
+</body>
+
+</html>
