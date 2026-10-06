@@ -382,7 +382,7 @@
 		<div class="slides">
 			<!-- Slide 1: Title -->
 			<section data-background-gradient="linear-gradient(to bottom, #ffffff, #dbe9f8)">
-				<h1>Domine a orquestração de Agentes em Java com <span class="quarkus-blue">Quarkus Flow</span></h1>
+				<h2>Domine a orquestração de Agentes em Java com <span class="quarkus-gradient">Quarkus LangChain4J</span> e <span class="quarkus-gradient">Quarkus Flow</span></span></h2>
 				<p style="margin-top: 3rem">
 					Matheus Cruz<br />
 				</p>
@@ -394,24 +394,26 @@
 				</aside>
 			</section>
 
-			<!-- Slide 2: AI-Infused Applications -->
+			<!-- Slide 2: AI Infused Apps - simple definition -->
 			<section>
-				<h2>Aplicações com IA Integrada
-					<span
-						style="display: block; font-size: 0.5em; font-weight: 400; font-style: italic; opacity: 0.7; margin-top: 0.3em">(AI
-						Infused applications)</span>
-				</h2>
-
+				<h2>AI Infused Apps</h2>
 				<p style="font-size: 0.9em; margin-top: 2rem">O que isso significa?</p>
-				<!--				TODO: Mudar essa porcaria, pegar o conceito daqui: https://learn.deeplearning.ai/courses/agentic-ai/lesson/nae3i1/what-is-agentic-ai%3F-->
-				<!--				TD-->
 				<blockquote class="quote fragment">
-					Programas de software que possuem recursos de inteligência artificial ou aprendizado de máquina
-					integrados diretamente à sua lógica central e operações diárias.
+					Uma aplicação AI-infused (ou "inteligente") é uma aplicação que usa um modelo ou serviço de
+					Inteligência Artificial (IA) / Aprendizado de Máquina (ML), muitas vezes como parte da sua
+					lógica.
 				</blockquote>
+				<p class="fragment" style="font-size: 0.5em; margin-top: 1.5rem">
+					Fonte:
+					<a href="https://www.mendix.com/evaluation-guide/app-lifecycle/develop/ai/ai-infused-apps/"
+						target="_blank" rel="noopener">What Is an AI-Infused or Smart App? (Mendix)</a>
+				</p>
 				<aside class="notes">
-					Começando pelos termos: aplicações AI-Infused são aplicações onde a IA faz parte da solução que
-					resolve problemas do negócio, não algo separado.
+					Definição simples pra abrir a talk. Não é sobre ter um chatbot separado — é sobre IA/ML fazendo
+					parte da lógica central da aplicação.
+					Mais pra frente, quando chegarmos nos padrões de agentes, vamos ver que "AI-infused apps",
+					"agentic systems" e "agentic AI" são nomes diferentes pro mesmo espectro: o quanto de autonomia
+					você entrega para a LLM dentro desse processo.
 				</aside>
 			</section>
 
@@ -490,14 +492,14 @@
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 
-ChatModel model = OpenAiChatModel.builder()
+ChatModel modelo = OpenAiChatModel.builder()
         .apiKey(System.getenv("OPENAI_API_KEY"))
         .modelName("gpt-4o-mini")
         .build();
 
-String response = model.chat("What are the common symptoms of the flu?");
+String resposta = modelo.chat("Quais são os sintomas comuns da gripe?");
 
-System.out.println(response);
+System.out.println(resposta);
 				</code></pre>
 				<aside class="notes">
 					A forma mais simples de se comunicar com a OpenAI usando LangChain4J: criamos um ChatModel com a API
@@ -515,15 +517,15 @@ System.out.println(response);
 				<h2 data-id="ai-service-title">E uma interface na sua aplicação</h2>
 				<pre data-id="ai-service-code"><code class="java" data-trim data-line-numbers>
 @RegisterAiService
-public interface DoctorAiService {
-    String ask(String message);
+public interface ServicoMedico {
+    String perguntar(String mensagem);
 }
 
 // Em um outro bean da sua aplicação:
 
-@Inject DoctorAiService ai;
+@Inject ServicoMedico ia;
 
-String answer = ai.ask("What are the common symptoms of the flu?");
+String resposta = ia.perguntar("Quais são os sintomas comuns da gripe?");
 
 
 
@@ -547,11 +549,11 @@ String answer = ai.ask("What are the common symptoms of the flu?");
 				</p>
 				<pre data-id="ai-service-code"><code class="java" data-trim data-line-numbers="|4|5">
 @RegisterAiService
-public interface DoctorAiService {
+public interface ServicoMedico {
 
-    @SystemMessage("You are a medical expert...")
-    @UserMessage("{message}")
-    String ask(String message);
+    @SystemMessage("Você é um especialista médico...")
+    @UserMessage("Considere a mensagem do usuário: {mensagem}")
+    String perguntar(String mensagem);
 
 }
 				</code></pre>
@@ -570,11 +572,11 @@ public interface DoctorAiService {
 				</p>
 				<pre data-id="ai-service-code"><code class="java" data-trim data-line-numbers="|6">
 @RegisterAiService
-public interface DoctorAiService {
+public interface ServicoMedico {
 
-    @SystemMessage("You are a medical expert...")
-    @UserMessage("{message}")
-    String ask(@MemoryId String sessionId, String message);
+    @SystemMessage("Você é um especialista médico...")
+    @UserMessage("Considere a mensagem do usuário: {mensagem}")
+    String perguntar(@MemoryId String idSessao, String mensagem);
 
 }
 				</code></pre>
@@ -593,14 +595,14 @@ public interface DoctorAiService {
 					<strong>seu código</strong>.
 				</p>
 				<pre data-id="ai-service-code"><code class="java" data-trim data-line-numbers="|3-4|6-8">
-public class AgendaTools {
+public class FerramentasAgenda {
 
     @Inject
-    AgendaRepository repo;
+    RepositorioAgenda repo;
 
-	  @Tool("get available agenda")
-    public Agenda getAgenda() {
-        return repo.availableAgenda();
+	  @Tool("busca a agenda disponível")
+    public Agenda buscarAgenda() {
+        return repo.agendaDisponivel();
     }
 
 }
@@ -619,12 +621,12 @@ public class AgendaTools {
 					Basta registrar a classe de tools no seu <strong>AI Service</strong>:
 				</p>
 				<pre data-id="ai-service-code"><code class="java" data-trim data-line-numbers="|1">
-@RegisterAiService(tools = {AgendaTools.class})
-public interface DoctorAiService {
+@RegisterAiService(tools = {FerramentasAgenda.class})
+public interface ServicoMedico {
 
-    @SystemMessage("You are a medical expert...")
-    @UserMessage("{message}")
-    String ask(@MemoryId String sessionId, String message);
+    @SystemMessage("Você é um especialista médico...")
+    @UserMessage("Considere a mensagem do usuário: {mensagem}")
+    String perguntar(@MemoryId String idSessao, String mensagem);
 
 }
 				</code></pre>
@@ -658,12 +660,12 @@ public interface DoctorAiService {
 					(alucinação, conteúdo inadequado) do seu AI Service.
 				</p>
 				<pre><code class="java" data-trim data-line-numbers="|4|5">
-@RegisterAiService(tools = {AgendaTools.class})
-public interface DoctorAiService {
+@RegisterAiService(tools = {FerramentasAgenda.class})
+public interface ServicoMedico {
 
-    @InputGuardrails(PromptInjectionGuard.class)
-    @OutputGuardrails(MedicalAnswerGuard.class)
-    String ask(@MemoryId String sessionId, String message);
+    @InputGuardrails(ProtecaoContraInjecao.class)
+    @OutputGuardrails(ProtecaoRespostaMedica.class)
+    String perguntar(@MemoryId String idSessao, String mensagem);
 
 }
 				</code></pre>
@@ -684,7 +686,7 @@ public interface DoctorAiService {
 					<!--					TODO: Nivel programatico: Nao programatico (Quarkus LangChain4J Agentic), Quarkus Flow DSL, Na mão... -->
 					<!--					TODO: autonomia para LLM: @SupervisorAgent, ..., na mão-->
 					<span class="quarkus-gradient">AI Services</span> resolvem muitos problemas, mas e quando o objetivo
-					exige um <span class="quarkus-gradient">workflow</span>: vários AI Services encadeados, de
+					exige um <span class="quarkus-gradient">Agentic AI Workflow</span>: vários AI Services encadeados, de
 					diferentes providers, colaborando entre si até chegar ao resultado?
 				</p>
 				<aside class="notes">
@@ -700,87 +702,49 @@ public interface DoctorAiService {
 				</aside>
 			</section>
 
-			<!-- Slide 6h: Transition - Agentic Systems -->
-			<section data-background-gradient="linear-gradient(to bottom, #ffffff, #dbe9f8)">
-				<h1 class="quarkus-gradient">Agentic Systems</h1>
-
-				<!--				Base > Agentic Patterns > (Workflow vs. Agents) > Quarkus Flow -->
+			<!-- Slide: Hidden workflow engine - the cost of orchestrating AI Services imperatively (adapted from
+			     "Quarkus Flow: Orquestrando Complexidade e Agentes de IA") -->
+			<section>
+				<h2>Cuidado com o workflow engine escondido</h2>
+				<p style="font-size: 0.85em; margin-top: 1.5rem">
+					Encadear múltiplos AI Services na mão significa cuidar, você mesmo, de:
+				</p>
+				<ul style="font-size: 0.8em">
+					<li class="fragment">
+						<strong>Observabilidade</strong> — rastrear o que cada LLM decidiu, em cada chamada
+					</li>
+					<li class="fragment">
+						<strong>Durabilidade</strong> — o que acontece se a aplicação reiniciar no meio do processo?
+					</li>
+					<li class="fragment">
+						<strong>Retries e timeouts</strong> — LLMs e APIs externas falham
+					</li>
+					<li class="fragment">
+						<strong>Estado de longa duração</strong> — um humano no meio do caminho pode levar horas pra
+						responder
+					</li>
+				</ul>
 				<aside class="notes">
-					Transição: até aqui falamos de um único AI Service com prompts, memória, tools, RAG e guardrails.
-					Agora vamos subir um nível: sistemas agênticos, onde vários agentes colaboram para resolver um
-					problema.
+					Tema recorrente de outra talk minha ("Quarkus Flow: Orquestrando Complexidade e Agentes de IA"):
+					se você não toma cuidado, a lógica de coordenação vai, aos poucos, se espalhando por diversas
+					partes do código. Com o tempo, lógica de negócio e preocupações de infraestrutura ficam
+					profundamente acopladas — e o código fica mais difícil de manter (a famosa "big ball of mud").
+					Aqui o mesmo problema aparece ao orquestrar AI Services na mão: cada chamada de LLM pode falhar,
+					demorar, ou depender de um humano no meio do caminho, e cada uma dessas preocupações (retry,
+					timeout, estado, observabilidade) vira código espalhado por try/catch e flags por toda a
+					aplicação.
+					Os 4 padrões que vêm a seguir resolvem a parte estrutural (como encadear os AI Services). Mas
+					durabilidade e observabilidade de verdade só vêm depois, com o Quarkus Flow.
 				</aside>
 			</section>
 
-			<!-- Slide: What are agentic systems -->
 			<section>
-				<h2>O que são sistemas agênticos?</h2>
-				<p style="font-size: 0.8em">
-					<span class="quarkus-gradient">Sistemas agênticos</span> usam LLMs e tools para resolver tarefas
-					complexas, e podem ir de fluxos <strong>predefinidos</strong> a sistemas
-					<strong>totalmente autônomos</strong>.
-				</p>
-				<p class="fragment" style="font-size: 0.6em; margin-top: 2rem">
-					Fonte:
-					<a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank"
-						rel="noopener">Building Effective Agents (Anthropic)</a>
-					· 19 dez 2024
-				</p>
-				<aside class="notes">
-					Não existe uma definição única de agente, então a Anthropic chama todas as variações, dos sistemas
-					mais prescritivos, que seguem workflows predefinidos, aos totalmente autônomos, de sistemas
-					agênticos. https://www.anthropic.com/engineering/building-effective-agents
-				</aside>
-			</section>
-
-			<!-- Slide: Workflows vs. Agents -->
-			<section>
-				<h2>Workflows vs. Agents</h2>
-				<p style="font-size: 0.75em">Segundo a Anthropic, dentro dos sistemas agênticos, existe uma distinção
-					arquitetural importante:</p>
-				<div
-					style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.2rem; font-size: 0.7em">
-					<div class="fragment"
-						style="background: rgba(70, 149, 235, 0.1); border-top: 4px solid var(--quarkus-blue); border-radius: 8px; padding: 1rem 1.2rem; text-align: left">
-						<p style="margin: 0 0 0.6rem; font-size: 1.3em; font-weight: 700; color: var(--quarkus-blue)">
-							Workflows</p>
-						<p style="margin: 0 0 0.8rem">
-							LLMs e tools orquestrados por <strong>caminhos de código predefinidos</strong>
-						</p>
-						<p style="margin: 0; font-size: 0.85em; opacity: 0.8">Quem decide o caminho: <strong>o seu
-								código</strong></p>
-					</div>
-					<div class="fragment"
-						style="background: rgba(255, 0, 74, 0.08); border-top: 4px solid var(--quarkus-red); border-radius: 8px; padding: 1rem 1.2rem; text-align: left">
-						<p style="margin: 0 0 0.6rem; font-size: 1.3em; font-weight: 700; color: var(--quarkus-red)">
-							Agents</p>
-						<p style="margin: 0 0 0.8rem">
-							LLMs <strong>dirigem dinamicamente</strong> o próprio processo e o uso de tools, mantendo o
-							controle de como executam a tarefa
-						</p>
-						<p style="margin: 0; font-size: 0.85em; opacity: 0.8">Quem decide o caminho: <strong>o
-								LLM</strong></p>
-					</div>
-				</div>
-				<aside class="notes">
-					Workflows são sistemas onde LLMs e tools são orquestrados por caminhos de código predefinidos.
-					Agents são sistemas onde os LLMs dirigem dinamicamente seu próprio processo e uso de tools,
-					mantendo o controle de como realizam a tarefa.
-
-					Atenção: tools existem nos dois lados. O que define um workflow é quem decide o caminho, não o uso
-					de tools.
-					- Workflow com tool: o código define a ordem dos passos, e um deles pode ser chamar o LLM com uma
-					tool ou só executar a tool. Ex.: passo 1 busca o pedido (tool), passo 2 o LLM resume, passo 3 envia
-					o e-mail (tool). O caminho é sempre o mesmo.
-					- Agent com tool: o LLM decide quais tools chamar, em que ordem e quantas vezes, até considerar a
-					tarefa concluída.
-					No LangChain4J, um AI Service com @Tool deixa o LLM escolher quando chamar aquela tool, mas o fluxo
-					em volta continua sendo código seu. Nos padrões @SequenceAgent, @ParallelAgent etc., o código é
-					quem define a orquestração.
-				</aside>
+			<h2>Como resolver isso?</h2>
+			<p>Quarkus LangChain4J Agentic e Quarkus Flow</p>
 			</section>
 
 			<!-- Slide: Workflow vs. Agents diagram (LangChain4j docs) -->
+
 			<section>
 				<h2>Workflows vs. Agents</h2>
 				<img src="images/workflow-vs-agents.png" alt="Workflow vs. Agents"
@@ -791,10 +755,9 @@ public interface DoctorAiService {
 						rel="noopener">LangChain4j Docs: Agents</a>
 				</p>
 				<aside class="notes">
-					Diagrama da documentação do LangChain4j: no workflow, LLMs e tools são orquestrados
-					programaticamente por caminhos de código predefinidos; nos agents, o LLM dirige o próprio processo
-					e o uso de tools, mantendo o controle de como executa as tarefas.
-					https://docs.langchain4j.dev/tutorials/agents#workflow-patterns
+					No workflow, LLMs e tools são orquestrados programaticamente por caminhos de código
+					predefinidos; nos agents, o LLM dirige o próprio processo e o uso de tools, mantendo o controle
+					de como executa as tarefas. https://docs.langchain4j.dev/tutorials/agents#workflow-patterns
 				</aside>
 			</section>
 
@@ -880,87 +843,87 @@ public interface DoctorAiService {
 
 			<!-- Slides: SequenceAgent code example, agent by agent -->
 			<section data-auto-animate>
-				<h2 data-id="sequence-title">1º agente: <span class="agent-type">CreativeWriter</span></h2>
+				<h2 data-id="sequence-title">1º agente: <span class="agent-type">EscritorCriativo</span></h2>
 				<pre data-id="sequence-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
 					style="max-height: 460px" class="java" data-trim data-line-numbers="|4|5-8|9-13|14">
 @RegisterAiService
-public interface CreativeWriter {
+public interface EscritorCriativo {
 
-    @Agent(name = "Creative writer", description = "Draft a short story about a topic.", outputKey = "story")
+    @Agent(name = "Escritor criativo", description = "Escreve o rascunho de uma estória sobre um tópico.", outputKey = "estoria")
     @SystemMessage("""
-            You are a creative fiction writer.
-            Write short, vivid stories, 4–6 sentences long.
+            Você é um escritor de ficção criativa.
+            Escreva estórias curtas e vívidas, de 4 a 6 frases.
             """)
     @UserMessage("""
-            Topic: {topic}
+            Tópico: {topico}
 
-            Write a short story about this topic.
+            Escreva uma estória curta sobre esse tópico.
             """)
-    String draft(@V("topic") String topic);
+    String rascunhar(@V("topico") String topico);
 }
 				</code></pre>
 				<aside class="notes">
-					Primeiro agente da sequência: o CreativeWriter recebe o tópico e escreve o rascunho da
-					história. Repare no outputKey "story": é nele que o resultado é gravado, e é daí que o próximo
+					Primeiro agente da sequência: o EscritorCriativo recebe o tópico e escreve o rascunho da
+					estória. Repare no outputKey "estoria": é nele que o resultado é gravado, e é daí que o próximo
 					agente vai ler.
 				</aside>
 			</section>
 
 			<section data-auto-animate>
-				<h2 data-id="sequence-title">2º agente: <span class="agent-type">AudienceEditor</span></h2>
+				<h2 data-id="sequence-title">2º agente: <span class="agent-type">EditorDePublico</span></h2>
 				<pre data-id="sequence-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
 					style="max-height: 460px" class="java" data-trim data-line-numbers="|4|10,14|16">
 @RegisterAiService
-public interface AudienceEditor {
+public interface EditorDePublico {
 
-    @Agent(name = "Audience editor", description = "Adapt story to a target audience.", outputKey = "story")
+    @Agent(name = "Editor de público", description = "Adapta a estória para um público-alvo.", outputKey = "estoria")
     @SystemMessage("""
-            You rewrite stories to better fit the target audience.
-            Keep structure similar but adjust language, tone, and difficulty.
+            Você reescreve estórias para se adequarem melhor ao público-alvo.
+            Mantenha a estrutura parecida, mas ajuste linguagem, tom e dificuldade.
             """)
     @UserMessage("""
-            Audience: {audience}
+            Público: {publico}
 
-            Rewrite the story below so it is ideal for this audience.
-            Story:
-            {story}
+            Reescreva a estória abaixo para que fique ideal para esse público.
+            Estória:
+            {estoria}
             """)
-    String adapt(@V("story") String story, @V("audience") String audience);
+    String adaptar(@V("estoria") String estoria, @V("publico") String publico);
 }
 				</code></pre>
 				<aside class="notes">
-					Segundo agente: o AudienceEditor recebe a história gerada pelo CreativeWriter (via {story}) e a
-					reescreve para o público-alvo. Ele escreve no mesmo outputKey "story", sobrescrevendo o estado
+					Segundo agente: o EditorDePublico recebe a estória gerada pelo EscritorCriativo (via {estoria}) e a
+					reescreve para o público-alvo. Ele escreve no mesmo outputKey "estoria", sobrescrevendo o estado
 					para o próximo agente.
 				</aside>
 			</section>
 
 			<section data-auto-animate>
-				<h2 data-id="sequence-title">3º agente: <span class="agent-type">StyleEditor</span></h2>
+				<h2 data-id="sequence-title">3º agente: <span class="agent-type">EditorDeEstilo</span></h2>
 				<pre data-id="sequence-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
 					style="max-height: 460px" class="java" data-trim data-line-numbers="|4|11,15|17">
 @RegisterAiService
-public interface StyleEditor {
+public interface EditorDeEstilo {
 
-    @Agent(name = "Style editor", description = "Adapt story to a specific writing style.", outputKey = "story")
+    @Agent(name = "Editor de estilo", description = "Adapta a estória a um estilo de escrita específico.", outputKey = "estoria")
     @SystemMessage("""
-            You rewrite stories in the requested writing style
-            (for example: fantasy, noir, comedy, sci-fi).
-            Keep the meaning, adjust style.
+            Você reescreve estórias no estilo de escrita solicitado
+            (por exemplo: fantasia, noir, comédia, ficção científica).
+            Mantenha o sentido, ajuste o estilo.
             """)
     @UserMessage("""
-            Style: {style}
+            Estilo: {estilo}
 
-            Rewrite the story below with this style.
-            Story:
-            {story}
+            Reescreva a estória abaixo nesse estilo.
+            Estória:
+            {estoria}
             """)
-    String restyle(@V("story") String story, @V("style") String style);
+    String reestilizar(@V("estoria") String estoria, @V("estilo") String estilo);
 }
 				</code></pre>
 				<aside class="notes">
-					Terceiro agente: o StyleEditor pega a história já adaptada ao público e a reescreve no estilo
-					pedido (fantasia, noir, comédia...). Mesmo mecanismo: lê {story}, grava em "story".
+					Terceiro agente: o EditorDeEstilo pega a estória já adaptada ao público e a reescreve no estilo
+					pedido (fantasia, noir, comédia...). Mesmo mecanismo: lê {estoria}, grava em "estoria".
 				</aside>
 			</section>
 
@@ -969,99 +932,100 @@ public interface StyleEditor {
 				<pre data-id="sequence-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
 					style="max-height: 460px" class="java" data-trim data-line-numbers="|4-5|6">
 @RegisterAiService
-public interface StoryCreatorWithConfigurableStyleEditor {
+public interface CriadorDeEstoriaComEstiloConfiguravel {
 
-    @SequenceAgent(outputKey = "story", subAgents = { CreativeWriter.class, AudienceEditor.class,
-            StyleEditor.class })
-    String write(@V("topic") String topic, @V("style") String style, @V("audience") String audience);
+    @SequenceAgent(outputKey = "estoria", subAgents = { EscritorCriativo.class, EditorDePublico.class,
+            EditorDeEstilo.class })
+    String escrever(@V("topico") String topico, @V("estilo") String estilo, @V("publico") String publico);
 }
 				</code></pre>
 				<aside class="notes">
 					E por fim o orquestrador: @SequenceAgent declara os três sub-agentes na ordem de execução
-					(CreativeWriter → AudienceEditor → StyleEditor). Como todos compartilham o outputKey "story", a
-					saída de um vira a entrada do próximo. Um único método write() dispara a sequência inteira.
+					(EscritorCriativo → EditorDePublico → EditorDeEstilo). Como todos compartilham o outputKey
+					"estoria", a saída de um vira a entrada do próximo. Um único método escrever() dispara a
+					sequência inteira.
 				</aside>
 			</section>
 
 			<!-- Slides: ParallelAgent code example, agent by agent -->
 			<section data-auto-animate data-auto-animate-id="parallel">
-				<h2 data-id="parallel-title">@ParallelAgent: <span class="agent-type">DinnerAgent</span></h2>
+				<h2 data-id="parallel-title">@ParallelAgent: <span class="agent-type">AgenteJantar</span></h2>
 				<pre data-id="parallel-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
 					style="max-height: 460px" class="java" data-trim data-line-numbers="|4|10-11|15">
 @RegisterAiService
-public interface DinnerAgent {
+public interface AgenteJantar {
 
-    @Agent(name = "Dinner planner", outputKey = "dinner")
+    @Agent(name = "Planejador de jantar", outputKey = "jantar")
     @SystemMessage("""
-            You suggest a single, concrete dinner option in the given city
-            for a given mood. Be specific and short.
+            Você sugere uma única opção concreta de jantar na cidade informada,
+            para o humor informado. Seja específico e breve.
             """)
     @UserMessage("""
-            City: {city}
-            Mood: {mood}
+            Cidade: {cidade}
+            Humor: {humor}
 
-            Suggest where to have dinner (one place, one sentence).
+            Sugira onde jantar (um lugar, uma frase).
             """)
-    String suggestDinner(@V("city") String city, @V("mood") Mood mood);
+    String sugerirJantar(@V("cidade") String cidade, @V("humor") Humor humor);
 }
 				</code></pre>
 				<aside class="notes">
-					Agora o padrão Parallel. O DinnerAgent sugere onde jantar a partir da cidade e do mood. Repare
-					que aqui cada agente tem seu próprio outputKey ("dinner") — diferente do Sequence, eles não
+					Agora o padrão Parallel. O AgenteJantar sugere onde jantar a partir da cidade e do humor. Repare
+					que aqui cada agente tem seu próprio outputKey ("jantar") — diferente do Sequence, eles não
 					encadeiam saída, cada um escreve numa chave separada.
 				</aside>
 			</section>
 
 			<section data-auto-animate data-auto-animate-id="parallel">
-				<h2 data-id="parallel-title">@ParallelAgent: <span class="agent-type">DrinksAgent</span></h2>
+				<h2 data-id="parallel-title">@ParallelAgent: <span class="agent-type">AgenteBebidas</span></h2>
 				<pre data-id="parallel-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
 					style="max-height: 460px" class="java" data-trim data-line-numbers="|4|9-10|14">
 @RegisterAiService
-public interface DrinksAgent {
+public interface AgenteBebidas {
 
-    @Agent(name = "Drinks planner", outputKey = "drinks")
+    @Agent(name = "Planejador de bebidas", outputKey = "bebidas")
     @SystemMessage("""
-            You suggest one place for drinks after dinner, matching the mood.
+            Você sugere um lugar para beber algo depois do jantar, combinando com o humor.
             """)
     @UserMessage("""
-            City: {city}
-            Mood: {mood}
+            Cidade: {cidade}
+            Humor: {humor}
 
-            Suggest where to have a drink (one place, one sentence).
+            Sugira onde beber algo (um lugar, uma frase).
             """)
-    String suggestDrinks(@V("city") String city, @V("mood") Mood mood);
+    String sugerirBebidas(@V("cidade") String cidade, @V("humor") Humor humor);
 }
 				</code></pre>
 				<aside class="notes">
-					O DrinksAgent sugere onde tomar um drink depois do jantar. Mesmas entradas (city e mood), mas
-					escreve no seu próprio outputKey "drinks". Como ele não depende da saída dos outros, pode rodar
+					O AgenteBebidas sugere onde tomar um drink depois do jantar. Mesmas entradas (cidade e humor), mas
+					escreve no seu próprio outputKey "bebidas". Como ele não depende da saída dos outros, pode rodar
 					ao mesmo tempo.
 				</aside>
 			</section>
 
 			<section data-auto-animate data-auto-animate-id="parallel">
-				<h2 data-id="parallel-title">@ParallelAgent: <span class="agent-type">ActivityAgent</span></h2>
+				<h2 data-id="parallel-title">@ParallelAgent: <span class="agent-type">AgenteAtividade</span></h2>
 				<pre data-id="parallel-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
 					style="max-height: 460px" class="java" data-trim data-line-numbers="|4|9-10|14">
 @RegisterAiService
-public interface ActivityAgent {
+public interface AgenteAtividade {
 
-    @Agent(name = "Activity planner", outputKey = "activity")
+    @Agent(name = "Planejador de atividade", outputKey = "atividade")
     @SystemMessage("""
-            You suggest one short activity to wrap up the evening.
+            Você sugere uma atividade curta para encerrar a noite.
             """)
     @UserMessage("""
-            City: {city}
-            Mood: {mood}
+            Cidade: {cidade}
+            Humor: {humor}
 
-            Suggest one activity, after dinner and drinks, to finish the evening.
+            Sugira uma atividade, depois do jantar e das bebidas, para encerrar a noite.
             """)
-    String suggestActivity(@V("city") String city, @V("mood") Mood mood);
+    String sugerirAtividade(@V("cidade") String cidade, @V("humor") Humor humor);
 }
 				</code></pre>
 				<aside class="notes">
-					O ActivityAgent fecha a noite sugerindo uma atividade. Terceiro agente independente, com
-					outputKey "activity". Três agentes, três chaves: dinner, drinks e activity.
+					O AgenteAtividade fecha a noite sugerindo uma atividade. Terceiro agente independente, com
+					outputKey "atividade". Três agentes, três chaves: jantar, bebidas e atividade.
 				</aside>
 			</section>
 
@@ -1070,73 +1034,73 @@ public interface ActivityAgent {
 				<pre data-id="parallel-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
 					style="max-height: 460px" class="java" data-trim data-line-numbers="|13|4-11|5-6|14">
 @RegisterAiService
-public interface EveningPlannerAgent {
+public interface AgentePlanejadorDaNoite {
 
     @Output
-    static EveningPlan toEveningPlan(@V("city") String city, @V("mood") Mood mood, @V("dinner") String dinner,
-            @V("drinks") String drinks, @V("activity") String activity) {
+    static PlanoDaNoite montarPlanoDaNoite(@V("cidade") String cidade, @V("humor") Humor humor, @V("jantar") String jantar,
+            @V("bebidas") String bebidas, @V("atividade") String atividade) {
 
-        return new EveningPlan(requireNonNullElse(city, "unknown city"), mood != null ? mood : Mood.CHILL,
-                requireNonNullElse(dinner, "surprise dinner"), requireNonNullElse(drinks, "surprise drinks"),
-                requireNonNullElse(activity, "surprise activity"));
+        return new PlanoDaNoite(requireNonNullElse(cidade, "cidade desconhecida"), humor != null ? humor : Humor.TRANQUILO,
+                requireNonNullElse(jantar, "jantar surpresa"), requireNonNullElse(bebidas, "bebidas surpresa"),
+                requireNonNullElse(atividade, "atividade surpresa"));
     }
 
-    @ParallelAgent(outputKey = "plan", subAgents = { DinnerAgent.class, DrinksAgent.class, ActivityAgent.class })
-    EveningPlan plan(@V("city") String city, @V("mood") Mood mood);
+    @ParallelAgent(outputKey = "plano", subAgents = { AgenteJantar.class, AgenteBebidas.class, AgenteAtividade.class })
+    PlanoDaNoite planejar(@V("cidade") String cidade, @V("humor") Humor humor);
 }
 				</code></pre>
 				<aside class="notes">
 					E o orquestrador: @ParallelAgent executa os três sub-agentes ao mesmo tempo. Como cada um
 					escreveu numa chave diferente, precisamos combinar os resultados: o método @Output é o
-					post-processor que lê dinner, drinks e activity do escopo e monta o EveningPlan final. Um único
-					plan(city, mood) dispara tudo em paralelo.
+					post-processor que lê jantar, bebidas e atividade do escopo e monta o PlanoDaNoite final. Um
+					único planejar(cidade, humor) dispara tudo em paralelo.
 				</aside>
 			</section>
 
 			<!-- Slides: LoopAgent code example, agent by agent -->
 			<section data-auto-animate data-auto-animate-id="loop">
-				<h2 data-id="loop-title">@LoopAgent: <span class="agent-type">StyleScorer</span></h2>
+				<h2 data-id="loop-title">@LoopAgent: <span class="agent-type">AvaliadorDeEstilo</span></h2>
 				<pre data-id="loop-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
 					style="max-height: 460px" class="java" data-trim data-line-numbers="|10|4-5|11">
-public interface StyleScorer {
+public interface AvaliadorDeEstilo {
     @UserMessage("""
-            You are a critical reviewer.
-            Give a review score between 0.0 and 1.0 for the following story
-            based on how well it aligns with the style '{{style}}'.
-            Return only the score and nothing else.
+            Você é um crítico rigoroso.
+            Dê uma nota entre 0.0 e 1.0 para a estória a seguir,
+            de acordo com o quanto ela está alinhada ao estilo '{{estilo}}'.
+            Responda apenas com a nota, nada mais.
 
-            The story is: "{{story}}"
+            A estória é: "{{estoria}}"
             """)
-    @Agent(description = "Score a story based on how well it aligns with a given style", outputKey = "score")
-    double scoreStyle(@V("story") String story, @V("style") String style);
+    @Agent(description = "Avalia uma estória com base no quanto ela está alinhada a um estilo.", outputKey = "nota")
+    double avaliarEstilo(@V("estoria") String estoria, @V("estilo") String estilo);
 }
 				</code></pre>
 				<aside class="notes">
-					Agora o padrão Loop. O StyleScorer é o crítico: avalia a história e devolve uma nota de 0.0 a
-					1.0 indicando o quanto ela está alinhada ao estilo pedido. A nota é gravada no outputKey
-					"score" — é ela que vai decidir se o loop continua ou para.
+					Agora o padrão Loop. O AvaliadorDeEstilo é o crítico: avalia a estória e devolve uma nota de 0.0
+					a 1.0 indicando o quanto ela está alinhada ao estilo pedido. A nota é gravada no outputKey
+					"nota" — é ela que vai decidir se o loop continua ou para.
 				</aside>
 			</section>
 
 			<section data-auto-animate data-auto-animate-id="loop">
-				<h2 data-id="loop-title">@LoopAgent: <span class="agent-type">StyleEditor</span></h2>
+				<h2 data-id="loop-title">@LoopAgent: <span class="agent-type">EditorDeEstilo</span></h2>
 				<pre data-id="loop-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
 					style="max-height: 460px" class="java" data-trim data-line-numbers="|9|4-5|10">
-public interface StyleEditor {
+public interface EditorDeEstilo {
     @UserMessage("""
-            You are a professional editor.
-            Analyze and rewrite the following story to better fit and be
-            more coherent with the {{style}} style.
-            Return only the story and nothing else.
-            The story is "{{story}}".
+            Você é um editor profissional.
+            Analise e reescreva a estória a seguir para que fique mais
+            alinhada e coerente com o estilo {{estilo}}.
+            Responda apenas com a estória, nada mais.
+            A estória é "{{estoria}}".
             """)
-    @Agent(description = "Edit a story to better fit a given style", outputKey = "story")
-    String editStory(@V("story") String story, @V("style") String style);
+    @Agent(description = "Edita uma estória para se adequar melhor a um estilo.", outputKey = "estoria")
+    String editarEstoria(@V("estoria") String estoria, @V("estilo") String estilo);
 }
 				</code></pre>
 				<aside class="notes">
-					O StyleEditor é quem melhora: reescreve a história para ficar mais coerente com o estilo e
-					grava o resultado de volta em "story". Crítico avalia, editor melhora — e a história revisada
+					O EditorDeEstilo é quem melhora: reescreve a estória para ficar mais coerente com o estilo e
+					grava o resultado de volta em "estoria". Crítico avalia, editor melhora — e a estória revisada
 					volta para o crítico na próxima iteração.
 				</aside>
 			</section>
@@ -1146,24 +1110,24 @@ public interface StyleEditor {
 				<pre data-id="loop-code" style="width: 120%; margin-left: -10%; font-size: 0.45em"><code
 					style="max-height: 460px" class="java" data-trim data-line-numbers="|10-12|4-8|7|13">
 @RegisterAiService
-public interface StyleReviewLoopAgentWithCounter {
+public interface RevisorDeEstiloComContador {
 
     @ExitCondition(testExitAtLoopEnd = true)
-    static boolean exit(@V("score") double score, @LoopCounter int loopCounter) {
-        loopCount.set(loopCounter);
-        return score >= 0.8;
+    static boolean sair(@V("nota") double nota, @LoopCounter int contador) {
+        contadorDeLoop.set(contador);
+        return nota >= 0.8;
     }
 
-    @LoopAgent(description = "Review the given story to ensure it aligns with the specified style",
-            outputKey = "story", maxIterations = 5,
-            subAgents = { StyleScorer.class, StyleEditor.class })
-    String write(@V("story") String story);
+    @LoopAgent(description = "Revisa a estória para garantir que ela esteja alinhada ao estilo especificado.",
+            outputKey = "estoria", maxIterations = 5,
+            subAgents = { AvaliadorDeEstilo.class, EditorDeEstilo.class })
+    String escrever(@V("estoria") String estoria);
 }
 				</code></pre>
 				<aside class="notes">
-					E o orquestrador: @LoopAgent executa StyleScorer → StyleEditor repetidamente. A cada iteração,
-					o @ExitCondition lê o "score" gravado pelo crítico: se chegou a 0.8, o loop para e devolve a
-					história. O maxIterations = 5 é a rede de segurança para não iterar para sempre, e o
+					E o orquestrador: @LoopAgent executa AvaliadorDeEstilo → EditorDeEstilo repetidamente. A cada
+					iteração, o @ExitCondition lê a "nota" gravada pelo crítico: se chegou a 0.8, o loop para e
+					devolve a estória. O maxIterations = 5 é a rede de segurança para não iterar para sempre, e o
 					@LoopCounter informa em qual iteração estamos.
 				</aside>
 			</section>
@@ -1174,41 +1138,41 @@ public interface StyleReviewLoopAgentWithCounter {
 				<pre style="width: 120%; margin-left: -10%; font-size: 0.45em"><code style="max-height: 460px"
 																																						 class="java" data-trim data-line-numbers="|25-27|4-7|9-13|15-18|20-23|28">
 @RegisterAiService
-public interface ExpertsAgent {
+public interface AgenteEspecialistas {
 
-    @ActivationCondition(MedicalExpert.class)
-    static boolean activateMedical(@V("category") RequestCategory category) {
-        return category == RequestCategory.MEDICAL;
+    @ActivationCondition(EspecialistaMedico.class)
+    static boolean ativarMedico(@V("categoria") CategoriaDaSolicitacao categoria) {
+        return categoria == CategoriaDaSolicitacao.MEDICA;
     }
 
-    @ActivationCondition(LegalExpert.class)
-    static boolean activateLegal(AgenticScope agenticScope) {
-        return agenticScope.readState("category", RequestCategory.UNKNOWN)
-                == RequestCategory.LEGAL;
+    @ActivationCondition(EspecialistaJuridico.class)
+    static boolean ativarJuridico(AgenticScope agenticScope) {
+        return agenticScope.readState("categoria", CategoriaDaSolicitacao.DESCONHECIDA)
+                == CategoriaDaSolicitacao.JURIDICA;
     }
 
-    @ActivationCondition(TechnicalExpert.class)
-    static boolean activateTechnical(@V("category") RequestCategory category) {
-        return category == RequestCategory.TECHNICAL;
+    @ActivationCondition(EspecialistaTecnico.class)
+    static boolean ativarTecnico(@V("categoria") CategoriaDaSolicitacao categoria) {
+        return categoria == CategoriaDaSolicitacao.TECNICA;
     }
 
-    @ActivationCondition(UnknownExpert.class)
-    static boolean activateUnknown(@V("category") RequestCategory category) {
-        return category == RequestCategory.UNKNOWN;
+    @ActivationCondition(EspecialistaDesconhecido.class)
+    static boolean ativarDesconhecido(@V("categoria") CategoriaDaSolicitacao categoria) {
+        return categoria == CategoriaDaSolicitacao.DESCONHECIDA;
     }
 
-    @ConditionalAgent(outputKey = "response",
-            subAgents = { MedicalExpert.class, LegalExpert.class,
-                    TechnicalExpert.class, UnknownExpert.class })
-    String askExpert(@V("request") String request);
+    @ConditionalAgent(outputKey = "resposta",
+            subAgents = { EspecialistaMedico.class, EspecialistaJuridico.class,
+                    EspecialistaTecnico.class, EspecialistaDesconhecido.class })
+    String perguntarEspecialista(@V("solicitacao") String solicitacao);
 }
 				</code></pre>
 				<aside class="notes">
 					Por fim, o padrão Conditional: o @ConditionalAgent declara quatro especialistas (médico,
 					jurídico, técnico e desconhecido), mas só executa aqueles cuja @ActivationCondition retornar
-					true. Cada condição lê a "category" do escopo — via @V ou via AgenticScope.readState, como no
-					LegalExpert — e decide se aquele expert é ativado. É um roteador: a pergunta vai direto para o
-					especialista certo, e a resposta é gravada em "response".
+					true. Cada condição lê a "categoria" do escopo — via @V ou via AgenticScope.readState, como no
+					EspecialistaJuridico — e decide se aquele especialista é ativado. É um roteador: a pergunta vai
+					direto para o especialista certo, e a resposta é gravada em "resposta".
 				</aside>
 			</section>
 
@@ -1306,14 +1270,14 @@ public interface ExpertsAgent {
 
 				<pre><code class="java" data-trim data-line-numbers="|1-2|3-11">
 @ApplicationScoped
-public class EmitFlow extends Flow {
+public class FluxoDeEmissao extends Flow {
   @Override
   public Workflow descriptor() {
-    return workflow("emit", "test")
+    return workflow("emissao", "teste")
       .tasks(
         emit("com.petstore.order.placed.v1")
           .source("https://petstore.com")
-          .jsonData(Order.class))
+          .jsonData(Pedido.class))
       .build();
   }
 }
@@ -1331,8 +1295,8 @@ public class EmitFlow extends Flow {
 						<code class="yaml" data-trim data-line-numbers="|1-5|6|7|8-19">
 document:
   dsl: '1.0.3'
-  namespace: test
-  name: emit
+  namespace: teste
+  name: emissao
   version: '0.1.0'
   do:
     - emitEvent:
@@ -1342,12 +1306,12 @@ document:
               source: https://petstore.com
               type: com.petstore.order.placed.v1
               data:
-                client:
-                  firstName: Cruella
-                  lastName: de Vil
-                items:
-                  - breed: dalmatian
-                    quantity: 101
+                cliente:
+                  nome: Cruella
+                  sobrenome: de Vil
+                itens:
+                  - raca: dalmata
+                    quantidade: 101
 					</code>
 				</pre>
 			</section>
@@ -1401,7 +1365,7 @@ document:
 			<section>
 				<h2><span class="quarkus-gradient">Quarkus Flow</span> + LangChain4J</h2>
 				<p style="font-size: 0.75em">
-					O Quarkus Flow é a camada de orquestração <strong>durável</strong> e <strong>observável</strong>
+					O Quarkus Flow é a camada de orquestração <strong>durável</strong>, <strong>reativa</strong> e <strong>observável</strong>
 					dos seus agents:
 				</p>
 				<div
@@ -1450,32 +1414,32 @@ document:
 @RegisterAiService
 @ApplicationScoped
 @SystemMessage("""
-        You draft a short, friendly newsletter paragraph.
-        Return ONLY the final draft text (no extra markup).
+        Você escreve um parágrafo curto e amigável de newsletter.
+        Responda APENAS com o texto final do rascunho (sem marcação extra).
         """)
-public interface DrafterAgent {
+public interface AgenteRedator {
 
-    @UserMessage("Brief:\n{{brief}}")
-    String draft(@MemoryId String memoryId, @V("brief") String brief);
+    @UserMessage("Resumo:\n{{resumo}}")
+    String rascunhar(@MemoryId String idMemoria, @V("resumo") String resumo);
 }
 
 @ApplicationScoped
-public class NewsletterFlow extends Flow {
+public class FluxoDeNewsletter extends Flow {
 
     @Inject
-    DrafterAgent drafterAgent;
+    AgenteRedator agenteRedator;
 
     @Override
     public Workflow descriptor() {
-        return workflow("newsletter-drafter")
-            .tasks(agent("draftAgent", drafterAgent::draft, String.class))
+        return workflow("rascunho-newsletter")
+            .tasks(agent("agenteRedator", agenteRedator::rascunhar, String.class))
             .build();
     }
 }
 				</code></pre>
 				<aside class="notes">
 					Primeira opção: você escreve o workflow na Java DSL e chama os seus AI Services como uma function.
-					Primeiro o AI Service de sempre, o DrafterAgent, com @RegisterAiService e as mensagens. Depois o
+					Primeiro o AI Service de sempre, o AgenteRedator, com @RegisterAiService e as mensagens. Depois o
 					Flow: injetamos o agent e usamos a task agent(nome, metodo, tipo). Com inputFrom você escolhe o que
 					o agent enxerga do contexto do workflow, e com exportAs o que ele devolve para o próximo passo.
 					Fonte: https://docs.quarkiverse.io/quarkus-flow/dev/langchain4j.html
